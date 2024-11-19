@@ -1,12 +1,13 @@
 from flask import Flask, request, render_template, render_template_string, session, redirect, url_for
-import mysql.connector
+import pymysql
 from hashlib import sha256
+import webbrowser
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 
 # MySQL 데이터베이스에 연결
-conn = mysql.connector.connect(
+conn = pymysql.connect(
     host='localhost',
     user='root',
     password='!als137963',
@@ -28,7 +29,7 @@ def signup(user_id, name, phone, address, post, password):
         )
         conn.commit()
         return "Signup successful"
-    except mysql.connector.Error as err:
+    except pymysql.Error as err:
         return f"Error: {err}"
 
 def verify_user(user_id, password):
@@ -40,7 +41,7 @@ def verify_user(user_id, password):
             return user[0]  # 사용자의 이름 반환
         else:
             return None
-    except mysql.connector.Error as err:
+    except pymysql.Error as err:
         return None
 
 @app.route('/')
@@ -108,6 +109,7 @@ def contact():
     return render_template('contact.html', user_name=user_name)
 
 if __name__ == "__main__":
+    webbrowser.open("http://127.0.0.1:5000")
     app.run(debug=True)
 
 # 앱이 종료될 때 데이터베이스 연결 닫기
