@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메인 페이지</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        header nav {
+            display: flex;
+            gap: 15px;
+        }
+        header nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+        .concerts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .concert-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            padding: 15px;
+            text-align: left;
+        }
+        .concert-card h3 {
+            margin: 0 0 10px;
+        }
+        .concert-card p {
+            margin: 0 0 5px;
+            color: #666;
+        }
+        .concert-card button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .concert-card button:hover {
+            background-color: #2ecc71;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">티켓 사이트</div>
+        <nav>
+            <a href="/">메인</a>
+            <a href="#">공연 정보</a>
+            <a href="#">문의하기</a>
+            {% if user_name %}
+                <span>환영합니다, {{ user_name }}님!</span>
+                <a href="/logout">로그아웃</a>
+            {% else %}
+                <a href="/login">로그인</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        <h1>공연을 즐겨보세요!</h1>
+        <p>가장 핫한 공연을 지금 바로 예매하세요!</p>
+        <div class="concerts">
+            {% for concert in concerts %}
+                <div class="concert-card">
+                    <h3>{{ concert[0] }}</h3>
+                    <p>아티스트: {{ concert[1] }}</p>
+                    <p>장소: {{ concert[2] }}</p>
+                    <p>날짜: {{ concert[3] }}</p>
+                    <button onclick="location.href='/show/{{ concert[4] }}'">예매하기</button>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+    <footer>
+        &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
+    </footer>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Seats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        header nav {
+            display: flex;
+            gap: 15px;
+        }
+        header nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            padding: 20px;
+            text-align: center;
+        }
+        .seats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .seat.available {
+            background-color: #27ae60;
+            color: white;
+        }
+        .seat.unavailable {
+            background-color: #e74c3c;
+            color: white;
+            cursor: not-allowed;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">티켓 사이트</div>
+        <nav>
+            <a href="/">메인</a>
+            <a href="#">공연 정보</a>
+            <a href="#">문의하기</a>
+            {% if user_name %}
+            {% else %}
+            {% endif %}
+                <a href="/login">로그인</a>
+                <span>환영합니다, {{ user_name }}님!</span>
+                <a href="/logout">로그아웃</a>
+        </nav>
+    </header>
+    <main>
+        <h1>Available Seats for Show ID: {{ show_id }}</h1>
+        <div class="seats">
+            {% for seat in seats %}
+                <div class="seat {% if seat[2] == 'available' %}available{% else %}unavailable{% endif %}">
+                    {{ seat[1] }}
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+    <footer>
+        &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
+    </footer>
+</body>
+</html>
