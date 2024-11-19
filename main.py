@@ -23,7 +23,7 @@ def signup(user_id, name, phone, address, post, password):
     hashed_password = hash_password(password)
     try:
         cursor.execute(
-            "INSERT INTO Member (ID, NAME, PHONE, ADDRESS, POST, PASSWORD) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO Member (ID, NAME, PHONE, ADDRES, POST, PASWORD) VALUES (%s, %s, %s, %s, %s, %s)",
             (user_id, name, phone, address, post, hashed_password)
         )
         conn.commit()
@@ -34,7 +34,7 @@ def signup(user_id, name, phone, address, post, password):
 def verify_user(user_id, password):
     hashed_password = hash_password(password)
     try:
-        cursor.execute("SELECT NAME FROM Member WHERE ID = %s AND PASSWORD = %s", (user_id, hashed_password))
+        cursor.execute("SELECT NAME FROM Member WHERE ID = %s AND PASWORD = %s", (user_id, hashed_password))
         user = cursor.fetchone()
         if user:
             return user[0]  # 사용자의 이름 반환
@@ -46,13 +46,13 @@ def verify_user(user_id, password):
 @app.route('/')
 def home():
     user_name = session.get('user_name')
-    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert")
+    cursor.execute("SELECT NUM, NAME, ARTIST, PLACE, DATE FROM Concert")
     concerts = cursor.fetchall()
     return render_template('main.html', user_name=user_name, concerts=concerts)
 
 @app.route('/concert/<int:concert_id>')
 def concert_details(concert_id):
-    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE, DESCRIPTION FROM Concert WHERE id = %s", (concert_id,))
+    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
     return render_template('concert_details.html', concert=concert)
 
@@ -95,20 +95,6 @@ def logout():
 @app.route('/seats')
 def seats():
     return render_template('seats.html')
-
-@app.route('/show/<int:show_id>')
-def show_details(show_id):
-    # Fetch show details from the database
-    cursor.execute("SELECT * FROM Shows WHERE id = %s", (show_id,))
-    show = cursor.fetchone()
-    return render_template('show_details.html', show=show)
-
-@app.route('/show/<int:show_id>/seats')
-def show_seats(show_id):
-    # Fetch seat information from the database
-    cursor.execute("SELECT * FROM Seats WHERE show_id = %s", (show_id,))
-    seats = cursor.fetchall()
-    return render_template('seats.html', seats=seats, show_id=show_id)
 
 @app.route('/contact')
 def contact():
