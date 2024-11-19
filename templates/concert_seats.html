@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Seats</title>
+    <title>좌석 정보 - 공연 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -38,29 +38,28 @@
             padding: 20px;
             text-align: center;
         }
-        .seats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        .seat {
-            width: 50px;
-            height: 50px;
+        table, th, td {
             border: 1px solid #ddd;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
         }
-        .seat.available {
-            background-color: #27ae60;
-            color: white;
+        th, td {
+            padding: 10px;
+            text-align: center;
         }
-        .seat.unavailable {
+        th {
+            background-color: #f4f4f4;
+        }
+        .reserved {
             background-color: #e74c3c;
             color: white;
-            cursor: not-allowed;
+        }
+        .available {
+            background-color: #2ecc71;
+            color: white;
         }
         footer {
             text-align: center;
@@ -78,25 +77,34 @@
         <div class="logo">티켓 사이트</div>
         <nav>
             <a href="/">메인</a>
-            <a href="#">공연 정보</a>
-            <a href="#">문의하기</a>
+            <a href="/concerts">공연 정보</a>
+            <a href="/contact">문의하기</a>
             {% if user_name %}
-            {% else %}
-            {% endif %}
-                <a href="/login">로그인</a>
                 <span>환영합니다, {{ user_name }}님!</span>
                 <a href="/logout">로그아웃</a>
+            {% else %}
+                <a href="/login">로그인</a>
+            {% endif %}
         </nav>
     </header>
     <main>
-        <h1>Available Seats for Show ID: {{ show_id }}</h1>
-        <div class="seats">
+        <h1>좌석 정보</h1>
+        <table>
+            <tr>
+                <th>좌석 번호</th>
+                <th>좌석 등급</th>
+                <th>가격</th>
+                <th>예약 상태</th>
+            </tr>
             {% for seat in seats %}
-                <div class="seat {% if seat[2] == 'available' %}available{% else %}unavailable{% endif %}">
-                    {{ seat[1] }}
-                </div>
+            <tr class="{{ 'reserved' if seat[3] else 'available' }}">
+                <td>{{ seat[0] }}</td>
+                <td>{{ seat[1] }}</td>
+                <td>{{ seat[2] }}</td>
+                <td>{{ '예약됨' if seat[3] else '예약 가능' }}</td>
+            </tr>
             {% endfor %}
-        </div>
+        </table>
     </main>
     <footer>
         &copy; 2024 공연 티켓 사이트. 모든 권리 보유.

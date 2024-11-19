@@ -23,7 +23,7 @@ def signup(user_id, name, phone, address, post, password):
     hashed_password = hash_password(password)
     try:
         cursor.execute(
-            "INSERT INTO Member (ID, NAME, PHONE, ADDRES, POST, PASWORD) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO Member (ID, NAME, PHONE, ADDRESS, POST, PASSWORD) VALUES (%s, %s, %s, %s, %s, %s)",
             (user_id, name, phone, address, post, hashed_password)
         )
         conn.commit()
@@ -34,7 +34,7 @@ def signup(user_id, name, phone, address, post, password):
 def verify_user(user_id, password):
     hashed_password = hash_password(password)
     try:
-        cursor.execute("SELECT NAME FROM Member WHERE ID = %s AND PASWORD = %s", (user_id, hashed_password))
+        cursor.execute("SELECT NAME FROM Member WHERE ID = %s AND PASSWORD = %s", (user_id, hashed_password))
         user = cursor.fetchone()
         if user:
             return user[0]  # 사용자의 이름 반환
@@ -55,6 +55,12 @@ def concert_details(concert_id):
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
     return render_template('concert_details.html', concert=concert)
+
+@app.route('/concert/<int:concert_id>/seats')
+def concert_seats(concert_id):
+    cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s", (concert_id,))
+    seats = cursor.fetchall()
+    return render_template('concert_seats.html', seats=seats)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_route():
@@ -94,7 +100,7 @@ def logout():
 
 @app.route('/seats')
 def seats():
-    return render_template('seats.html')
+    return render_template('concert_seats.html')
 
 @app.route('/contact')
 def contact():
