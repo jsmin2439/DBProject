@@ -56,16 +56,55 @@ def concert_details(concert_id):
     user_name = session.get('user_name')
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
-    return render_template('concert_details.html', concert=concert, user_name=user_name)
+    return render_template('concert_details.html', concert=concert, concert_id=concert_id, user_name=user_name)
 
-@app.route('/concert/<int:concert_id>/seats')
+@app.route('/concert/<int:concert_id>/seats', methods=['GET', 'POST'])
 def concert_seats(concert_id):
     user_name = session.get('user_name')
+    selected_seat = None
+    if request.method == 'POST':
+        selected_seat = request.form.get('seat')
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
     cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s LIMIT 50", (concert_id,))
     seats = cursor.fetchall()
-    return render_template('concert_seats.html', concert=concert, seats=seats, user_name=user_name)
+    return render_template('concert_seats.html', concert=concert, seats=seats, concert_id=concert_id, user_name=user_name, selected_seat=selected_seat)
+
+@app.route('/concert/<int:concert_id>/confirm', methods=['GET', 'POST'])
+def concert_confirm(concert_id):
+    if request.method == 'POST':
+        user_name = session.get('user_name')
+        user_id = session.get('user_id')  # 세션에서 사용자 ID 가져오기
+        seat_num = request.form['seat']
+
+        cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
+        concert = cursor.fetchone()
+        cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num,))
+        seat = cursor.fetchone()
+
+        seat_price = seat[2]
+        concert_date = concert[3]
+
+        try:
+            print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_id}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
+            cursor.execute(
+                "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert) VALUES (%s, %s, %s, %s, %s)",
+                (seat_price, concert_date, user_id, seat_num, concert_id)
+            )
+            conn.commit()
+            return render_template_string('<script>alert("결제가 성공적으로 완료되었습니다!"); window.location.href="/";</script>')
+        except pymysql.Error as err:
+            print(f"Error inserting into Member_Orders: {err}")
+            return render_template_string(f'<script>alert("결제 실패: {err}"); window.location.href="/";</script>')
+    else:
+        user_name = session.get('user_name')
+        seat_num = request.args.get('seat')
+        cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
+        concert = cursor.fetchone()
+        cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num,))
+        seat = cursor.fetchone()
+        return render_template('concert_confirm.html', concert=concert, seat=seat, concert_id=concert_id, user_name=user_name)
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_route():

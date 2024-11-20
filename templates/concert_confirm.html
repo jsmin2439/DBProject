@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공연 상세 정보 - 티켓 사이트</title>
+    <title>결제 확인 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,18 +36,22 @@
         }
         main {
             padding: 20px;
+            text-align: center;
         }
         .concert-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 20px;
-            margin-bottom: 20px;
-        }
-        .concert-details h1 {
-            margin: 0 0 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
         }
         .concert-details p {
-            margin: 5px 0;
+            margin: 0;
             color: #666;
         }
         .concert-details button {
@@ -57,7 +61,7 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 20px;
         }
         .concert-details button:hover {
             background-color: #2ecc71;
@@ -78,7 +82,6 @@
         <div class="logo">티켓 사이트</div>
         <nav>
             <a href="/">메인</a>
-            <a href="/concerts">공연 정보</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}
                 <span>환영합니다, {{ user_name }}님!</span>
@@ -89,16 +92,23 @@
         </nav>
     </header>
     <main>
+        <h1>결제 확인</h1>
         <div class="concert-details">
-            <h1>{{ concert[0] }}</h1>
+            <p>콘서트: {{ concert[0] }}</p>
             <p>아티스트: {{ concert[1] }}</p>
             <p>장소: {{ concert[2] }}</p>
             <p>날짜: {{ concert[3] }}</p>
-            <button onclick="location.href='/concert/{{ concert_id }}/seats'">좌석 예매</button>
+            <p>좌석 번호: {{ seat[0] }}</p>
+            <p>좌석 등급: {{ seat[1] }}</p>
+            <p>좌석 가격: {{ seat[2] }}</p>
+            <form method="post" action="/concert/{{ concert_id }}/confirm">
+                <input type="hidden" name="seat" value="{{ seat[0] }}">
+                <button type="submit">결제 확인</button>
+            </form>
         </div>
     </main>
     <footer>
-        &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
+        &copy; 2024 티켓 사이트. 모든 권리 보유.
     </footer>
 </body>
 </html>

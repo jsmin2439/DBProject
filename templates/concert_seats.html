@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>좌석 예매 - 공연 티켓 사이트</title>
+    <title>좌석 선택 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,53 +35,89 @@
             text-decoration: underline;
         }
         main {
-            display: flex;
-            height: calc(100vh - 60px);
-        }
-        .left, .right {
-            flex: 1;
             padding: 20px;
-            overflow-y: auto;
-        }
-        .left {
-            border-right: 1px solid #ddd;
-        }
-        .right {
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            gap: 20px;
+        }
+        .concert-details, .seat-selection {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            flex: 1;
+        }
+        .concert-details h1, .seat-selection h1 {
+            margin: 0 0 10px;
+        }
+        .concert-details p, .seat-selection p {
+            margin: 5px 0;
+            color: #666;
         }
         .stage {
-            width: 80%;
-            height: 50px;
-            background-color: #34495e;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            text-align: center;
             margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #000;
+            padding: 10px;
+            background-color: #f0f0f0;
         }
         .seats {
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             gap: 10px;
+            justify-content: center;
         }
         .seat {
-            width: 30px;
-            height: 30px;
-            background-color: white;
+            position: relative;
+            width: 50px;
+            height: 50px;
+            background-color: #fff;
             border: 1px solid #ddd;
-            cursor: pointer;
+            border-radius: 5px;
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
             font-size: 12px;
+        }
+        .seat input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .seat input[type="radio"]:checked + span {
+            background-color: #27ae60;
+            color: white;
+            border-color: #27ae60;
         }
         .seat.reserved {
             background-color: #e74c3c;
+            color: white;
             cursor: not-allowed;
         }
-        .seat.selected {
+        .selected-seat {
+            margin-top: 20px;
+        }
+        .selected-seat p {
+            margin: 5px 0;
+        }
+        .seat-details {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .seat-details button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .seat-details button:hover {
             background-color: #2ecc71;
         }
         footer {
@@ -94,27 +130,12 @@
             width: 100%;
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const seats = document.querySelectorAll('.seat:not(.reserved)');
-            seats.forEach(seat => {
-                seat.addEventListener('click', function() {
-                    if (this.classList.contains('selected')) {
-                        this.classList.remove('selected');
-                    } else {
-                        this.classList.add('selected');
-                    }
-                });
-            });
-        });
-    </script>
 </head>
 <body>
     <header>
-        <div class="logo">티켓 사이트</div>
+        <a class="logo">티켓 사이트</a>
         <nav>
             <a href="/">메인</a>
-            <a href="/concerts">공연 정보</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}
                 <span>환영합니다, {{ user_name }}님!</span>
@@ -125,26 +146,43 @@
         </nav>
     </header>
     <main>
-        <div class="left">
-            <h1>공연 정보</h1>
-            <p>공연명: {{ concert[0] }}</p>
+        <div class="concert-details">
+            <h1>{{ concert[0] }}</h1>
             <p>아티스트: {{ concert[1] }}</p>
             <p>장소: {{ concert[2] }}</p>
             <p>날짜: {{ concert[3] }}</p>
         </div>
-        <div class="right">
+        <div class="seat-selection">
             <div class="stage">무대</div>
-            <div class="seats">
-                {% for seat in seats %}
-                <div class="seat {% if seat[3] %}reserved{% endif %}" data-seat-id="{{ seat[0] }}">
-                    {{ seat[1] }}<br>{{ seat[0] }}
+            <form method="post" action="/concert/{{ concert_id }}/seats">
+                <div class="seats">
+                    {% for seat in seats %}
+                    <label class="seat {% if seat[3] %}reserved{% elif seat[0] == selected_seat %}selected{% endif %}">
+                        <input type="radio" name="seat" value="{{ seat[0] }}" data-price="{{ seat[2] }}" data-class="{{ seat[1] }}" {% if seat[3] %}disabled{% endif %} {% if seat[0] == selected_seat %}checked{% endif %}>
+                        <span>{{ seat[1] }}<br>{{ seat[0] }}</span>
+                    </label>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            </form>
+            <div class="seat-details" id="seat-details">
+                <p>좌석 번호: <span id="seat-number"></span></p>
+                <p>좌석 등급: <span id="seat-class"></span></p>
+                <p>좌석 가격: <span id="seat-price"></span></p>
+                <button type="button" onclick="location.href='/concert/{{ concert_id }}/confirm?seat=' + document.querySelector('input[name=seat]:checked').value">결제하기</button>
             </div>
         </div>
     </main>
     <footer>
         &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
     </footer>
+    <script>
+        document.querySelectorAll('.seat input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('seat-number').textContent = this.value;
+                document.getElementById('seat-class').textContent = this.dataset.class;
+                document.getElementById('seat-price').textContent = this.dataset.price;
+            });
+        });
+    </script>
 </body>
 </html>
