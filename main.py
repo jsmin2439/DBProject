@@ -74,7 +74,6 @@ def concert_seats(concert_id):
 def concert_confirm(concert_id):
     if request.method == 'POST':
         user_name = session.get('user_name')
-        user_id = session.get('user_id')  # 세션에서 사용자 ID 가져오기
         seat_num = request.form['seat']
 
         cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
@@ -86,10 +85,10 @@ def concert_confirm(concert_id):
         concert_date = concert[3]
 
         try:
-            print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_id}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
+            print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_name}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
             cursor.execute(
                 "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert) VALUES (%s, %s, %s, %s, %s)",
-                (seat_price, concert_date, user_id, seat_num, concert_id)
+                (seat_price, concert_date, user_name, seat_num, concert_id)
             )
             conn.commit()
             return render_template_string('<script>alert("결제가 성공적으로 완료되었습니다!"); window.location.href="/";</script>')
