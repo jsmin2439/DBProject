@@ -53,15 +53,19 @@ def home():
 
 @app.route('/concert/<int:concert_id>')
 def concert_details(concert_id):
+    user_name = session.get('user_name')
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
-    return render_template('concert_details.html', concert=concert)
+    return render_template('concert_details.html', concert=concert, user_name=user_name)
 
 @app.route('/concert/<int:concert_id>/seats')
 def concert_seats(concert_id):
-    cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s", (concert_id,))
+    user_name = session.get('user_name')
+    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
+    concert = cursor.fetchone()
+    cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s LIMIT 50", (concert_id,))
     seats = cursor.fetchall()
-    return render_template('concert_seats.html', seats=seats)
+    return render_template('concert_seats.html', concert=concert, seats=seats, user_name=user_name)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_route():
@@ -101,7 +105,8 @@ def logout():
 
 @app.route('/seats')
 def seats():
-    return render_template('concert_seats.html')
+    user_name = session.get('user_name')
+    return render_template('concert_seats.html', user_name=user_name)
 
 @app.route('/contact')
 def contact():

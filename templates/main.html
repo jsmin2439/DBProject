@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,7 +115,7 @@
                     <h3>{{ concert[1] }}</h3>
                     <p>{{ concert[3] }} - {{ concert[4] }}</p>
                     <button onclick="location.href='/concert/{{ concert[0] }}'">상세보기</button>
-                    <button onclick="location.href='/seats'">좌석 예매</button>
+                    <button onclick="location.href='/concert/{{ concert[0] }}/seats'">좌석 예매</button>
                 </div>
             </div>
             {% endfor %}
