@@ -132,9 +132,13 @@
     </style>
 </head>
 <body>
-    <header>
-        <a class="logo">티켓 사이트</a>
+     <header>
+        <div class="logo">티켓 사이트</div>
         <nav>
+            <form action="/search" method="get">
+                <input type="text" name="query" placeholder="공연 검색" required>
+                <button type="submit">검색</button>
+            </form>
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}

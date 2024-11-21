@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - 티켓 사이트</title>
+    <title>검색 결과 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,58 +24,59 @@
         }
         header nav {
             display: flex;
-            align-items: center;
             gap: 15px;
         }
-        header nav a, header nav button {
+        header nav a {
             color: white;
             text-decoration: none;
             font-size: 16px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
         }
-        header nav a:hover, header nav button:hover {
+        header nav a:hover {
             text-decoration: underline;
-        }
-        header form {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        header input[type="text"] {
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
         }
         main {
             padding: 20px;
             text-align: center;
         }
-        form {
+        .concerts {
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 400px;
-            margin: 0 auto;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
-        input[type="text"], input[type="password"] {
-            padding: 10px;
+        .concert-card {
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 16px;
+            overflow: hidden;
+            width: 300px;
+            text-align: left;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        button {
+        .concert-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .concert-card .details {
+            padding: 15px;
+        }
+        .concert-card .details h3 {
+            margin: 0 0 10px;
+        }
+        .concert-card .details p {
+            margin: 0 0 15px;
+            color: #666;
+        }
+        .concert-card .details button {
             background-color: #27ae60;
             color: white;
             border: none;
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            margin-right: 10px;
         }
-        button:hover {
+        .concert-card .details button:hover {
             background-color: #2ecc71;
         }
         footer {
@@ -103,17 +104,30 @@
                 <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
                 <a href="/logout">로그아웃</a>
             {% else %}
+                <a href="/login">로그인</a>
                 <a href="/signup">회원가입</a>
             {% endif %}
         </nav>
     </header>
     <main>
-        <h1>로그인</h1>
-        <form action="/login" method="post">
-            <input type="text" name="id" placeholder="아이디 (필수)" required>
-            <input type="password" name="password" placeholder="비밀번호 (필수)" required>
-            <button type="submit">로그인</button>
-        </form>
+        <h1>검색 결과</h1>
+        {% if results %}
+        <div class="concerts">
+            {% for concert in results %}
+            <div class="concert-card">
+                <img src="{{ concert[5] }}" alt="Concert Image">
+                <div class="details">
+                    <h3>{{ concert[1] }}</h3>
+                    <p>{{ concert[3] }} - {{ concert[4] }}</p>
+                    <button onclick="location.href='/concert/{{ concert[0] }}'">상세보기</button>
+                    <button onclick="location.href='/concert/{{ concert[0] }}/seats'">좌석 예매</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>검색 결과가 없습니다.</p>
+        {% endif %}
     </main>
     <footer>
         &copy; 2024 티켓 사이트. 모든 권리 보유.

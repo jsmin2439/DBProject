@@ -177,7 +177,7 @@ def signup_route():
         password = request.form['password']
         message = signup(user_id, name, phone, address, post, password)
         if message == "Signup successful":
-            return render_template_string('<script>alert("Signup successful!"); window.location.href="/login";</script>')
+            return render_template_string('<script>alert("회원가입 되었습니다!"); window.location.href="/login";</script>')
         else:
             return message
     return render_template('signup.html')
@@ -192,9 +192,9 @@ def login():
         user_name = verify_user(user_id, password)
         if user_name:
             session['user_name'] = user_name  # 사용자의 이름을 세션에 저장
-            return render_template_string('<script>alert("Login successful!"); window.location.href="/";</script>')
+            return render_template_string('<script>alert("로그인 성공!"); window.location.href="/";</script>')
         else:
-            return render_template_string('<script>alert("Invalid credentials!"); window.location.href="/login";</script>')
+            return render_template_string('<script>alert("로그인 실패."); window.location.href="/login";</script>')
     return render_template('login.html')
 
 @app.route('/logout')
@@ -230,6 +230,14 @@ def delete_account():
             return render_template_string('<script>alert("ID 또는 비밀번호가 잘못되었습니다."); window.location.href="/delete_account";</script>')
 
     return render_template('delete_account.html')
+
+@app.route('/search')
+def search():
+    query = request.args.get('query')
+    cursor.execute("SELECT NUM, NAME, ARTIST, PLACE, DATE FROM Concert WHERE NAME LIKE %s OR ARTIST LIKE %s", (f"%{query}%", f"%{query}%"))
+    results = cursor.fetchall()
+    user_name = session.get('user_name')
+    return render_template('search_results.html', results=results, user_name=user_name)
 
 @app.route('/seats')
 def seats():
