@@ -66,6 +66,22 @@
             bottom: 0;
             width: 100%;
         }
+        .delete-account {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .delete-account button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .delete-account button:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +106,11 @@
             <p>전화번호: {{ user[2] }}</p>
             <p>주소: {{ user[3] }}</p>
             <p>우편번호: {{ user[4] }}</p>
+            <div class="delete-account">
+                <form action="/delete_account" method="post">
+                    <button type="submit">회원 탈퇴</button>
+                </form>
+            </div>
         </div>
         <div class="order-details">
             <h2>구매 좌석</h2>

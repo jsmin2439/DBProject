@@ -1,9 +1,18 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html><!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - 티켓 사이트</title>
+    <title>회원 탈퇴 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -52,7 +61,7 @@
             font-size: 16px;
         }
         button {
-            background-color: #27ae60;
+            background-color: #e74c3c;
             color: white;
             border: none;
             padding: 10px;
@@ -61,7 +70,7 @@
             font-size: 16px;
         }
         button:hover {
-            background-color: #2ecc71;
+            background-color: #c0392b;
         }
         footer {
             text-align: center;
@@ -80,15 +89,15 @@
         <nav>
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
-            <a href="/signup">회원가입</a>
+            <a href="/login">로그인</a>
         </nav>
     </header>
     <main>
-        <h1>로그인</h1>
-        <form action="/login" method="post">
+        <h1>회원 탈퇴</h1>
+        <form action="/delete_account" method="post">
             <input type="text" name="id" placeholder="아이디 (필수)" required>
             <input type="password" name="password" placeholder="비밀번호 (필수)" required>
-            <button type="submit">로그인</button>
+            <button type="submit">탈퇴</button>
         </form>
     </main>
     <footer>

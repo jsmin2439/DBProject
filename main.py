@@ -81,9 +81,13 @@ def concert_details(concert_id):
     concert = cursor.fetchone()
     return render_template('concert_details.html', concert=concert, concert_id=concert_id, user_name=user_name)
 
+
 @app.route('/concert/<int:concert_id>/seats', methods=['GET', 'POST'])
 def concert_seats(concert_id):
     user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('non_member'))
+
     selected_seat = None
     if request.method == 'POST':
         selected_seat = request.form.get('seat')
@@ -91,14 +95,20 @@ def concert_seats(concert_id):
             session['selected_seat'] = selected_seat
             session['concert_id'] = concert_id
             return redirect(url_for('non_member'))
+
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
-    cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s LIMIT 50", (concert_id,))
+    cursor.execute(
+        "SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s LIMIT 50",
+        (concert_id,))
     seats = cursor.fetchall()
     cursor.execute("SELECT NUM_Seat FROM Member_Orders WHERE NUM_Concert = %s", (concert_id,))
     purchased_seats = cursor.fetchall()
     purchased_seat_numbers = [seat[0] for seat in purchased_seats]
-    return render_template('concert_seats.html', concert=concert, seats=seats, concert_id=concert_id, user_name=user_name, selected_seat=selected_seat, purchased_seat_numbers=purchased_seat_numbers)
+
+    return render_template('concert_seats.html', concert=concert, seats=seats, concert_id=concert_id,
+                           user_name=user_name, selected_seat=selected_seat,
+                           purchased_seat_numbers=purchased_seat_numbers)
 
 @app.route('/non_member', methods=['GET', 'POST'])
 def non_member():
@@ -167,7 +177,7 @@ def signup_route():
         password = request.form['password']
         message = signup(user_id, name, phone, address, post, password)
         if message == "Signup successful":
-            return render_template_string('<script>alert("Signup successful!"); window.location.href="/signup";</script>')
+            return render_template_string('<script>alert("Signup successful!"); window.location.href="/login";</script>')
         else:
             return message
     return render_template('signup.html')
@@ -191,6 +201,35 @@ def login():
 def logout():
     session.pop('user_name', None)  # 세션에서 사용자 이름 제거
     return redirect(url_for('home'))
+
+@app.route('/delete_account', methods=['GET', 'POST'])
+def delete_account():
+    if request.method == 'POST':
+        user_name = session.get('user_name')
+        if not user_name:
+            return redirect(url_for('login'))
+
+        user_id = request.form.get('id', None)
+        password = request.form.get('password', None)
+        if not user_id or not password:
+            return render_template_string('<script>alert("ID와 비밀번호를 입력해주세요!"); window.location.href="/delete_account";</script>')
+
+        hashed_password = hash_password(password)
+        cursor.execute("SELECT ID FROM Member WHERE ID = %s AND PASSWORD = %s", (user_id, hashed_password))
+        user = cursor.fetchone()
+        if user:
+            try:
+                cursor.execute("DELETE FROM Member_Orders WHERE ID_Member = %s", (user_id,))
+                cursor.execute("DELETE FROM Member WHERE ID = %s", (user_id,))
+                conn.commit()
+                session.pop('user_name', None)
+                return render_template_string('<script>alert("회원 탈퇴가 완료되었습니다."); window.location.href="/";</script>')
+            except pymysql.Error as err:
+                return render_template_string(f'<script>alert("회원 탈퇴 실패: {err}"); window.location.href="/delete_account";</script>')
+        else:
+            return render_template_string('<script>alert("ID 또는 비밀번호가 잘못되었습니다."); window.location.href="/delete_account";</script>')
+
+    return render_template('delete_account.html')
 
 @app.route('/seats')
 def seats():
