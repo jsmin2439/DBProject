@@ -122,7 +122,7 @@ def non_member():
 
         try:
             cursor.execute(
-                "INSERT INTO NON_Member (PHONE, NAME, ADDRESS, POST, ACCOUNT, BANK) VALUES (%s, %s, %s, %s, %s, %s)",
+                "INSERT INTO Non_Member (PHONE, NAME, ADDRESS, POST, ACCOUNT, BANK) VALUES (%s, %s, %s, %s, %s, %s)",
                 (phone, name, address, post, account, bank)
             )
             conn.commit()
@@ -149,6 +149,7 @@ def concert_confirm(concert_id):
         concert_date = concert[3]
 
         try:
+            print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_name}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
             cursor.execute(
                 "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert) VALUES (%s, %s, %s, %s, %s)",
                 (seat_price, concert_date, user_name, seat_num, concert_id)
