@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>결제 확인 - 티켓 사이트</title>
+    <title>사용자 정보 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,36 +35,27 @@
             text-decoration: underline;
         }
         main {
-            padding: 20px;
-            text-align: center;
-        }
-        .concert-details {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .user-details, .order-details {
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            margin: 0 auto;
+            width: 45%;
         }
-        .concert-details p {
+        .user-details p, .order-details p {
             margin: 0;
             color: #666;
         }
-        .concert-details button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
+        .order-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
         }
-        .concert-details button:hover {
-            background-color: #2ecc71;
+        .order-item:last-child {
+            border-bottom: none;
         }
         footer {
             text-align: center;
@@ -84,27 +75,35 @@
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}
-                <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
-                <a href="/logout">로그아웃</a>
             {% else %}
-                <a href="/login">로그인</a>
             {% endif %}
+                <a href="/login">로그인</a>
+                <span>환영합니다, {{ user_name }}님!</span>
+                <a href="/logout">로그아웃</a>
         </nav>
     </header>
     <main>
-        <h1>결제 확인</h1>
-        <div class="concert-details">
-            <p>콘서트: {{ concert[0] }}</p>
-            <p>아티스트: {{ concert[1] }}</p>
-            <p>장소: {{ concert[2] }}</p>
-            <p>날짜: {{ concert[3] }}</p>
-            <p>좌석 번호: {{ seat[0] }}</p>
-            <p>좌석 등급: {{ seat[1] }}</p>
-            <p>좌석 가격: {{ seat[2] }}</p>
-            <form method="post" action="/concert/{{ concert_id }}/confirm">
-                <input type="hidden" name="seat" value="{{ seat[0] }}">
-                <button type="submit">결제 확인</button>
-            </form>
+        <div class="user-details">
+            <h2>사용자 정보</h2>
+            <p>아이디: {{ user[0] }}</p>
+            <p>이름: {{ user[1] }}</p>
+            <p>전화번호: {{ user[2] }}</p>
+            <p>주소: {{ user[3] }}</p>
+            <p>우편번호: {{ user[4] }}</p>
+        </div>
+        <div class="order-details">
+            <h2>구매 좌석</h2>
+            {% for order in orders %}
+            <div class="order-item">
+                <p>공연명: {{ order[0] }}</p>
+                <p>아티스트: {{ order[1] }}</p>
+                <p>장소: {{ order[2] }}</p>
+                <p>날짜: {{ order[3] }}</p>
+                <p>가격: {{ order[4] }}</p>
+                <p>좌석 번호: {{ order[5] }}</p>
+                <p>좌석 등급: {{ order[6] }}</p>
+            </div>
+            {% endfor %}
         </div>
     </main>
     <footer>

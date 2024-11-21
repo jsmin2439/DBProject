@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공연 상세 정보 - 티켓 사이트</title>
+    <title>비회원 정보 입력 - 티켓 사이트</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,30 +36,31 @@
         }
         main {
             padding: 20px;
+            text-align: center;
         }
-        .concert-details {
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        input[type="text"], input[type="tel"] {
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 20px;
+            font-size: 16px;
         }
-        .concert-details h1 {
-            margin: 0 0 10px;
-        }
-        .concert-details p {
-            margin: 5px 0;
-            color: #666;
-        }
-        .concert-details button {
+        button {
             background-color: #27ae60;
             color: white;
             border: none;
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            font-size: 16px;
         }
-        .concert-details button:hover {
+        button:hover {
             background-color: #2ecc71;
         }
         footer {
@@ -74,31 +75,28 @@
     </style>
 </head>
 <body>
-<header>
-    <div class="logo">티켓 사이트</div>
-    <nav>
-        <a href="/">메인</a>
-        <a href="/concerts">공연 정보</a>
-        <a href="/contact">문의하기</a>
-        {% if user_name %}
-            <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
-            <a href="/logout">로그아웃</a>
-        {% else %}
+    <header>
+        <div class="logo">티켓 사이트</div>
+        <nav>
+            <a href="/">메인</a>
+            <a href="/contact">문의하기</a>
             <a href="/login">로그인</a>
-        {% endif %}
-    </nav>
-</header>
+        </nav>
+    </header>
     <main>
-        <div class="concert-details">
-            <h1>{{ concert[0] }}</h1>
-            <p>아티스트: {{ concert[1] }}</p>
-            <p>장소: {{ concert[2] }}</p>
-            <p>날짜: {{ concert[3] }}</p>
-            <button onclick="location.href='/concert/{{ concert_id }}/seats'">좌석 예매</button>
-        </div>
+        <h1>비회원 정보 입력</h1>
+        <form method="post" action="/non_member">
+            <input type="tel" name="phone" placeholder="전화번호 (필수)" required>
+            <input type="text" name="name" placeholder="이름 (필수)" required>
+            <input type="text" name="post" placeholder="우편번호 (선택)">
+            <input type="text" name="address" placeholder="주소 (선택)">
+            <input type="text" name="account" placeholder="은행 계좌 (선택)">
+            <input type="text" name="bank" placeholder="은행 (선택)">
+            <button type="submit">등록</button>
+        </form>
     </main>
     <footer>
-        &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
+        &copy; 2024 티켓 사이트. 모든 권리 보유.
     </footer>
 </body>
 </html>

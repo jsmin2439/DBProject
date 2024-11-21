@@ -97,7 +97,7 @@
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}
-                <span>환영합니다, {{ user_name }}님!</span>
+                <span>환영합니다, <a href="/user/{{ session['user_name'] }}">{{ user_name }}</a>님!</span>
                 <a href="/logout">로그아웃</a>
             {% else %}
                 <a href="/login">로그인</a>
