@@ -75,11 +75,11 @@
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
             {% if user_name %}
-            {% else %}
-            {% endif %}
-                <a href="/login">로그인</a>
                 <span>환영합니다, {{ user_name }}님!</span>
                 <a href="/logout">로그아웃</a>
+            {% else %}
+                <a href="/login">로그인</a>
+            {% endif %}
         </nav>
     </header>
     <main>
