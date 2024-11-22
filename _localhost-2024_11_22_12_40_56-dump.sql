@@ -23,13 +23,15 @@ DROP TABLE IF EXISTS `Account`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Account` (
-  `NUM` char(40) NOT NULL,
+  `NUM` int NOT NULL AUTO_INCREMENT,
   `BANK` char(40) NOT NULL,
   `ID_Member` char(40) NOT NULL,
+  `ACCOUNT` char(40) NOT NULL,
   PRIMARY KEY (`NUM`),
   UNIQUE KEY `name_Bank_UNIQUE` (`BANK`),
-  KEY `fk_Account_Member1_idx` (`ID_Member`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  KEY `fk_Account_Member1_idx` (`ID_Member`),
+  CONSTRAINT `Account_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +145,7 @@ CREATE TABLE `Member` (
 
 LOCK TABLES `Member` WRITE;
 /*!40000 ALTER TABLE `Member` DISABLE KEYS */;
-INSERT INTO `Member` VALUES ('jongseok','민종석','01012341234','','','0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c');
+INSERT INTO `Member` VALUES ('1234','dsaf','123','','','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
 /*!40000 ALTER TABLE `Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -193,10 +195,10 @@ CREATE TABLE `Member_Orders` (
   KEY `fk_Member_Orders_Member1_idx` (`ID_Member`),
   KEY `fk_Member_Orders_Concert_Detail1_idx` (`NUM_Seat`),
   KEY `NUM_Concert_idx` (`NUM_Concert`),
-  CONSTRAINT `Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `Member_Orders_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  CONSTRAINT `Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
+  CONSTRAINT `Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
+  CONSTRAINT `Member_Orders_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,6 +207,7 @@ CREATE TABLE `Member_Orders` (
 
 LOCK TABLES `Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Member_Orders` DISABLE KEYS */;
+INSERT INTO `Member_Orders` VALUES (18,150000,'2024-12-15 00:00:00','1234','B05',2),(19,100000,'2024-11-30 00:00:00','1234','C06',3),(20,200000,'2024-12-15 00:00:00','1234','A04',2);
 /*!40000 ALTER TABLE `Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -243,8 +246,8 @@ DROP TABLE IF EXISTS `Member_Refund`;
 CREATE TABLE `Member_Refund` (
   `NUM` int NOT NULL AUTO_INCREMENT,
   `NUM_Member_Orders` int NOT NULL,
-  `NUM_Account` char(40) NOT NULL,
-  `Bank_Account` char(40) NOT NULL,
+  `NUM_Account` char(40) DEFAULT NULL,
+  `Bank_Account` char(40) DEFAULT NULL,
   PRIMARY KEY (`NUM`),
   KEY `fk_Member_Refund_Member_Orders1_idx` (`NUM_Member_Orders`),
   KEY `fk_Member_Refund_Account1_idx` (`NUM_Account`),
@@ -271,10 +274,10 @@ DROP TABLE IF EXISTS `Non_Member`;
 CREATE TABLE `Non_Member` (
   `PHONE` char(40) NOT NULL,
   `NAME` char(40) NOT NULL,
-  `ADDRESS` char(255) NOT NULL,
-  `POST` int NOT NULL,
-  `ACCOUNT` char(40) NOT NULL,
-  `BANK` char(40) NOT NULL,
+  `ADDRESS` char(255) DEFAULT NULL,
+  `POST` int DEFAULT NULL,
+  `ACCOUNT` char(40) DEFAULT NULL,
+  `BANK` char(40) DEFAULT NULL,
   PRIMARY KEY (`PHONE`),
   UNIQUE KEY `bank_Non_Member_UNIQUE` (`BANK`),
   UNIQUE KEY `account_Non_Member_UNIQUE` (`ACCOUNT`)
@@ -469,4 +472,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-21  1:02:47
+-- Dump completed on 2024-11-22 12:40:57

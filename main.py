@@ -135,8 +135,8 @@ def non_member():
     if request.method == 'POST':
         phone = request.form['phone']
         name = request.form['name']
-        address = request.form.get('address', '')
         post = request.form.get('post', '')
+        address = request.form.get('address', '')
         account = request.form.get('account', '')
         bank = request.form.get('bank', '')
 
