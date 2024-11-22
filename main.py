@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='!als137963',
+    password='root',
     database='DBProject'
 )
 cursor = conn.cursor()
@@ -135,20 +135,24 @@ def non_member():
     if request.method == 'POST':
         phone = request.form['phone']
         name = request.form['name']
-        post = request.form.get('post', '')
+        post = request.form.get('post', 0, type=int)
         address = request.form.get('address', '')
         account = request.form.get('account', '')
         bank = request.form.get('bank', '')
 
         try:
+            print(f"{type(phone)}, {type(name)}, {type(address)}, {type(post)}, {type(account)}, {type(bank)}")
+            print(f"{phone}, {name}, {address}, {post}, {account}, {bank}")
             cursor.execute(
                 "INSERT INTO Non_Member (PHONE, NAME, ADDRESS, POST, ACCOUNT, BANK) VALUES (%s, %s, %s, %s, %s, %s)",
                 (phone, name, address, post, account, bank)
             )
             conn.commit()
+            print("fsfdsfdfsf")
             concert_id = session.get('concert_id')
             selected_seat = session.get('selected_seat')
-            return redirect(url_for('concert_seats', concert_id=concert_id))
+            print(concert_id, selected_seat)
+            return redirect(url_for('concert_seats', concert_id=concert_id, selected_seat=selected_seat))
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
 
@@ -275,8 +279,8 @@ def contact():
     return render_template('contact.html', user_name=user_name)
 
 if __name__ == "__main__":
-    webbrowser.open("http://127.0.0.1:5000")
-    app.run(debug=True)
+    # webbrowser.open("http://127.0.0.1:5000")
+    app.run('0.0.0.0', debug=True)
 
 # 앱이 종료될 때 데이터베이스 연결 닫기
 @app.teardown_appcontext
