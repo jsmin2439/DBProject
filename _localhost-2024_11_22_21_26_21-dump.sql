@@ -28,10 +28,9 @@ CREATE TABLE `Account` (
   `ID_Member` char(40) NOT NULL,
   `ACCOUNT` char(40) NOT NULL,
   PRIMARY KEY (`NUM`),
-  UNIQUE KEY `name_Bank_UNIQUE` (`BANK`),
   KEY `fk_Account_Member1_idx` (`ID_Member`),
   CONSTRAINT `Account_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,6 +39,7 @@ CREATE TABLE `Account` (
 
 LOCK TABLES `Account` WRITE;
 /*!40000 ALTER TABLE `Account` DISABLE KEYS */;
+INSERT INTO `Account` VALUES (12,'ewsa','1234','2314124');
 /*!40000 ALTER TABLE `Account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -145,7 +145,7 @@ CREATE TABLE `Member` (
 
 LOCK TABLES `Member` WRITE;
 /*!40000 ALTER TABLE `Member` DISABLE KEYS */;
-INSERT INTO `Member` VALUES ('1234','dsaf','123','','','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+INSERT INTO `Member` VALUES ('1234','sdf','3241','','','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
 /*!40000 ALTER TABLE `Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -191,6 +191,8 @@ CREATE TABLE `Member_Orders` (
   `ID_Member` char(40) NOT NULL,
   `NUM_Seat` char(40) NOT NULL,
   `NUM_Concert` int NOT NULL,
+  `REFUND` tinyint(1) NOT NULL,
+  `EXCHANGE` tinyint(1) NOT NULL,
   PRIMARY KEY (`NUM`),
   KEY `fk_Member_Orders_Member1_idx` (`ID_Member`),
   KEY `fk_Member_Orders_Concert_Detail1_idx` (`NUM_Seat`),
@@ -198,7 +200,7 @@ CREATE TABLE `Member_Orders` (
   CONSTRAINT `Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
   CONSTRAINT `Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
   CONSTRAINT `Member_Orders_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -207,7 +209,7 @@ CREATE TABLE `Member_Orders` (
 
 LOCK TABLES `Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Member_Orders` DISABLE KEYS */;
-INSERT INTO `Member_Orders` VALUES (18,150000,'2024-12-15 00:00:00','1234','B05',2),(19,100000,'2024-11-30 00:00:00','1234','C06',3),(20,200000,'2024-12-15 00:00:00','1234','A04',2);
+INSERT INTO `Member_Orders` VALUES (27,200000,'2024-12-15 00:00:00','1234','A01',2,1,0),(28,150000,'2024-11-30 00:00:00','1234','B02',3,1,0);
 /*!40000 ALTER TABLE `Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -290,6 +292,7 @@ CREATE TABLE `Non_Member` (
 
 LOCK TABLES `Non_Member` WRITE;
 /*!40000 ALTER TABLE `Non_Member` DISABLE KEYS */;
+INSERT INTO `Non_Member` VALUES ('2134','werq','',0,'','');
 /*!40000 ALTER TABLE `Non_Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -472,4 +475,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-22 12:40:57
+-- Dump completed on 2024-11-22 21:26:22

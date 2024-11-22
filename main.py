@@ -10,8 +10,9 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='root',
-    database='DBProject'
+    password='!als137963',
+    database='DBProject',
+    charset='utf8mb4'
 )
 cursor = conn.cursor()
 
@@ -70,20 +71,33 @@ def user_profile(user_name):
     user = cursor.fetchone()
 
     cursor.execute("""
-        SELECT DISTINCT Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Member_Orders.SALEPRICE, Concert_Detail.NUM_Seat, Concert_Detail.CLASS_Seat
+        SELECT DISTINCT Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Member_Orders.SALEPRICE, Concert_Detail.NUM_Seat, Concert_Detail.CLASS_Seat, Member_Orders.NUM
         FROM Member_Orders
         JOIN Concert ON Member_Orders.NUM_Concert = Concert.NUM
         JOIN Concert_Detail ON Member_Orders.NUM_Seat = Concert_Detail.NUM_Seat
         JOIN Member ON Member_Orders.ID_Member = Member.ID
-        WHERE Member.NAME = %s
+        WHERE Member.NAME = %s AND Member_Orders.REFUND = 0
     """, (user_name,))
     orders = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT DISTINCT Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Member_Orders.SALEPRICE, Concert_Detail.NUM_Seat, Concert_Detail.CLASS_Seat, Account.BANK, Account.ACCOUNT, Member_Orders.NUM
+        FROM Member_Orders
+        JOIN Concert ON Member_Orders.NUM_Concert = Concert.NUM
+        JOIN Concert_Detail ON Member_Orders.NUM_Seat = Concert_Detail.NUM_Seat
+        JOIN Member ON Member_Orders.ID_Member = Member.ID
+        JOIN Account ON Member.ID = Account.ID_Member
+        WHERE Member.NAME = %s AND Member_Orders.REFUND = 1
+        ORDER BY Member_Orders.NUM DESC
+        LIMIT 5
+    """, (user_name,))
+    refunds = cursor.fetchall()
 
     cursor.execute("SELECT NUM, BANK, ACCOUNT FROM Account WHERE ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (user_name,))
     accounts = cursor.fetchall()
 
     if user:
-        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts)
+        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts, refunds=refunds)
     else:
         return render_template_string('<script>alert("사용자 정보를 찾을 수 없습니다."); window.location.href="/";</script>')
 
@@ -162,27 +176,32 @@ def non_member():
 def concert_confirm(concert_id):
     if request.method == 'POST':
         user_name = session.get('user_name')
+        user_id = session.get('user_id')  # 세션에서 사용자 ID 가져오기
         seat_num = request.form['seat']
 
         cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
         concert = cursor.fetchone()
-        cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num,))
+        cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num))
         seat = cursor.fetchone()
 
         seat_price = seat[2]
         concert_date = concert[3]
 
         # 사용자 ID 가져오기
-        cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
+        cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name))
         user_name = cursor.fetchone()[0]
 
         try:
             print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_name}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
             cursor.execute(
-                "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert) VALUES (%s, %s, %s, %s, %s)",
-                (seat_price, concert_date, user_name, seat_num, concert_id)
+                "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert, REFUND, EXCHANGE) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                (seat_price, concert_date, user_name, seat_num, concert_id, 0, 0)
             )
             conn.commit()
+
+            cursor.execute("UPDATE Concert_Detail SET RESERVATION = 1 WHERE NUM_Concert = %s AND NUM_Seat = %s",(concert_id, seat_num))
+            conn.commit()
+
             return render_template_string('<script>alert("결제가 성공적으로 완료되었습니다!"); window.location.href="/";</script>')
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("결제 실패: {err}"); window.location.href="/";</script>')
@@ -248,9 +267,18 @@ def delete_account():
         user = cursor.fetchone()
         if user:
             try:
+                # Account 테이블에서 해당 사용자의 계좌 정보 삭제
+                cursor.execute("DELETE FROM Account WHERE ID_Member = %s", (user_id,))
+                conn.commit()
+
+                # Member_Orders 테이블에서 해당 사용자의 주문 정보 삭제
                 cursor.execute("DELETE FROM Member_Orders WHERE ID_Member = %s", (user_id,))
+                conn.commit()
+
+                # Member 테이블에서 사용자 삭제
                 cursor.execute("DELETE FROM Member WHERE ID = %s", (user_id,))
                 conn.commit()
+
                 session.pop('user_name', None)
                 return render_template_string('<script>alert("회원 탈퇴가 완료되었습니다."); window.location.href="/";</script>')
             except pymysql.Error as err:
@@ -259,6 +287,38 @@ def delete_account():
             return render_template_string('<script>alert("ID 또는 비밀번호가 잘못되었습니다."); window.location.href="/delete_account";</script>')
 
     return render_template('delete_account.html')
+
+@app.route('/refund/<int:order_id>', methods=['GET', 'POST'])
+def refund(order_id):
+    user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        account_id = request.form.get('account_id')
+        if account_id:
+            try:
+                # Member_Orders의 REFUND 값을 1로 업데이트
+                cursor.execute("UPDATE Member_Orders SET REFUND = 1 WHERE NUM = %s", (order_id,))
+                conn.commit()
+
+                # Concert_Detail의 RESERVATION 값을 0으로 업데이트
+                cursor.execute("""
+                    UPDATE Concert_Detail
+                    SET RESERVATION = 0
+                    WHERE NUM_Seat = (SELECT NUM_Seat FROM Member_Orders WHERE NUM = %s)
+                """, (order_id,))
+                conn.commit()
+
+                return render_template_string('<script>alert("환불이 성공적으로 처리되었습니다!"); window.location.href="/user/%s";</script>' % user_name)
+            except pymysql.Error as err:
+                return render_template_string(f'<script>alert("환불 실패: {err}"); window.location.href="/user/{user_name}";</script>')
+
+    cursor.execute("SELECT NUM, BANK, ACCOUNT FROM Account WHERE ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (user_name,))
+    accounts = cursor.fetchall()
+    return render_template('refund.html', accounts=accounts, order_id=order_id)
+
+
 
 @app.route('/search')
 def search():
@@ -279,8 +339,8 @@ def contact():
     return render_template('contact.html', user_name=user_name)
 
 if __name__ == "__main__":
-    # webbrowser.open("http://127.0.0.1:5000")
-    app.run('0.0.0.0', debug=True)
+    webbrowser.open("http://127.0.0.1:5001")
+    app.run('0.0.0.0',port=5001, debug=True)
 
 # 앱이 종료될 때 데이터베이스 연결 닫기
 @app.teardown_appcontext

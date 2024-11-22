@@ -36,25 +36,27 @@
         }
         main {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
-        .user-details, .order-details {
+        .user-details, .order-details, .refund-details {
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 20px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 45%;
+            width: 80%;
+            margin-bottom: 20px;
         }
-        .user-details p, .order-details p {
+        .user-details p, .order-details p, .refund-details p {
             margin: 0;
             color: #666;
         }
-        .order-item {
+        .order-item, .refund-item {
             border-bottom: 1px solid #ddd;
             padding: 10px 0;
         }
-        .order-item:last-child {
+        .order-item:last-child, .refund-item:last-child {
             border-bottom: none;
         }
         footer {
@@ -131,6 +133,16 @@
             font-size: 18px;
         }
     </style>
+    <script>
+        function validateRefundForm() {
+            const accountSelect = document.querySelector('.account-details select');
+            if (accountSelect && accountSelect.value === '') {
+                alert('환불 계좌를 선택해주세요.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -199,8 +211,33 @@
                 <p>가격: {{ order[4] }}</p>
                 <p>좌석 번호: {{ order[5] }}</p>
                 <p>좌석 등급: {{ order[6] }}</p>
+                <form action="/refund/{{ order[7] }}" method="post" onsubmit="return validateRefundForm()" style="display:inline;">
+                    <button type="submit">환불</button>
+                </form>
+                <form action="/exchange/{{ order[7] }}" method="post" style="display:inline;">
+                    <button type="submit">교환</button>
+                </form>
             </div>
             {% endfor %}
+        </div>
+        <div class="refund-details">
+            <h2>환불 내역</h2>
+            {% if refunds %}
+                {% for refund in refunds %}
+                <div class="refund-item">
+                    <p>공연명: {{ refund[0] }}</p>
+                    <p>아티스트: {{ refund[1] }}</p>
+                    <p>장소: {{ refund[2] }}</p>
+                    <p>날짜: {{ refund[3] }}</p>
+                    <p>가격: {{ refund[4] }}</p>
+                    <p>좌석 번호: {{ refund[5] }}</p>
+                    <p>좌석 등급: {{ refund[6] }}</p>
+                    <p>환불 계좌: {{ refund[7] }} - {{ refund[8] }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>환불 내역이 없습니다.</p>
+            {% endif %}
         </div>
     </main>
     <footer>
