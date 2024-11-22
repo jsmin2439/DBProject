@@ -51,11 +51,20 @@ def home():
     concerts = cursor.fetchall()
     return render_template('main.html', user_name=user_name, concerts=concerts)
 
-@app.route('/user/<user_name>')
+@app.route('/user/<user_name>', methods=['GET', 'POST'])
 def user_profile(user_name):
     session_user_name = session.get('user_name')
     if session_user_name != user_name:
         return render_template_string('<script>alert("잘못된 접근입니다."); window.location.href="/";</script>')
+
+    if request.method == 'POST':
+        bank = request.form.get('bank')
+        account = request.form.get('account')
+        if bank and account:
+            cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
+            user_id = cursor.fetchone()[0]
+            cursor.execute("INSERT INTO Account (BANK, ID_Member, ACCOUNT) VALUES (%s, %s, %s)", (bank, user_id, account))
+            conn.commit()
 
     cursor.execute("SELECT ID, NAME, PHONE, ADDRESS, POST FROM Member WHERE NAME = %s", (user_name,))
     user = cursor.fetchone()
@@ -65,14 +74,24 @@ def user_profile(user_name):
         FROM Member_Orders
         JOIN Concert ON Member_Orders.NUM_Concert = Concert.NUM
         JOIN Concert_Detail ON Member_Orders.NUM_Seat = Concert_Detail.NUM_Seat
-        WHERE Member_Orders.ID_Member = %s
+        JOIN Member ON Member_Orders.ID_Member = Member.ID
+        WHERE Member.NAME = %s
     """, (user_name,))
     orders = cursor.fetchall()
 
+    cursor.execute("SELECT NUM, BANK, ACCOUNT FROM Account WHERE ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (user_name,))
+    accounts = cursor.fetchall()
+
     if user:
-        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders)
+        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts)
     else:
         return render_template_string('<script>alert("사용자 정보를 찾을 수 없습니다."); window.location.href="/";</script>')
+
+@app.route('/delete_bank/<int:account_id>', methods=['POST'])
+def delete_bank(account_id):
+    cursor.execute("DELETE FROM Account WHERE NUM = %s", (account_id,))
+    conn.commit()
+    return redirect(url_for('user_profile', user_name=session.get('user_name')))
 
 @app.route('/concert/<int:concert_id>')
 def concert_details(concert_id):
@@ -86,6 +105,7 @@ def concert_details(concert_id):
 def concert_seats(concert_id):
     user_name = session.get('user_name')
     if not user_name:
+        session['concert_id'] = concert_id
         return redirect(url_for('non_member'))
 
     selected_seat = None
@@ -128,7 +148,7 @@ def non_member():
             conn.commit()
             concert_id = session.get('concert_id')
             selected_seat = session.get('selected_seat')
-            return redirect(url_for('concert_confirm', concert_id=concert_id, seat=selected_seat))
+            return redirect(url_for('concert_seats', concert_id=concert_id))
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
 
@@ -147,6 +167,10 @@ def concert_confirm(concert_id):
 
         seat_price = seat[2]
         concert_date = concert[3]
+
+        # 사용자 ID 가져오기
+        cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
+        user_name = cursor.fetchone()[0]
 
         try:
             print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_name}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")

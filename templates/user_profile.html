@@ -82,10 +82,58 @@
         .delete-account button:hover {
             background-color: #c0392b;
         }
+        .account-form {
+            margin-top: 20px;
+        }
+        .account-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: calc(50% - 10px);
+        }
+        .account-form button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .account-form button:hover {
+            background-color: #2ecc71;
+        }
+        .account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .account-item:last-child {
+            border-bottom: none;
+        }
+        .account-item button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .account-item button:hover {
+            background-color: #c0392b;
+        }
+        .account-details h2, .account-form h3 {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
-     <header>
+    <header>
         <div class="logo">티켓 사이트</div>
         <nav>
             <form action="/search" method="get">
@@ -110,6 +158,30 @@
             <p>전화번호: {{ user[2] }}</p>
             <p>주소: {{ user[3] }}</p>
             <p>우편번호: {{ user[4] }}</p>
+            <div class="account-details">
+                <h2>계좌 정보</h2>
+                {% if accounts %}
+                    {% for account in accounts %}
+                    <div class="account-item">
+                        <p>은행: {{ account[1] }}</p>
+                        <p>계좌번호: {{ account[2] }}</p>
+                        <form action="/delete_bank/{{ account[0] }}" method="post">
+                            <button type="submit">삭제</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>없음</p>
+                {% endif %}
+            </div>
+            <div class="account-form">
+                <h3>계좌 정보 추가</h3>
+                <form method="post">
+                    <input type="text" name="bank" placeholder="은행" required>
+                    <input type="text" name="account" placeholder="계좌번호" required>
+                    <button type="submit">추가</button>
+                </form>
+            </div>
             <div class="delete-account">
                 <form action="/delete_account" method="post">
                     <button type="submit">회원 탈퇴</button>
