@@ -200,7 +200,7 @@ CREATE TABLE `Member_Orders` (
   CONSTRAINT `Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
   CONSTRAINT `Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
   CONSTRAINT `Member_Orders_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,7 +209,7 @@ CREATE TABLE `Member_Orders` (
 
 LOCK TABLES `Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Member_Orders` DISABLE KEYS */;
-INSERT INTO `Member_Orders` VALUES (27,200000,'2024-12-15 00:00:00','1234','A01',2,1,0),(28,150000,'2024-11-30 00:00:00','1234','B02',3,1,0);
+INSERT INTO `Member_Orders` VALUES (27,200000,'2024-12-15 00:00:00','1234','A01',2,1,0),(28,150000,'2024-11-30 00:00:00','1234','B02',3,1,0),(29,150000,'2024-12-15 00:00:00','1234','B02',2,1,0),(30,150000,'2024-12-15 00:00:00','1234','B03',2,1,0),(31,150000,'2024-11-30 00:00:00','1234','B04',3,1,0),(32,150000,'2024-11-30 00:00:00','1234','B05',3,1,0),(33,150000,'2024-12-15 00:00:00','1234','B02',2,1,0),(34,150000,'2024-11-30 00:00:00','1234','B02',3,1,0),(35,100000,'2024-11-30 00:00:00','1234','C02',3,1,0);
 /*!40000 ALTER TABLE `Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -280,9 +280,7 @@ CREATE TABLE `Non_Member` (
   `POST` int DEFAULT NULL,
   `ACCOUNT` char(40) DEFAULT NULL,
   `BANK` char(40) DEFAULT NULL,
-  PRIMARY KEY (`PHONE`),
-  UNIQUE KEY `bank_Non_Member_UNIQUE` (`BANK`),
-  UNIQUE KEY `account_Non_Member_UNIQUE` (`ACCOUNT`)
+  PRIMARY KEY (`PHONE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -292,7 +290,7 @@ CREATE TABLE `Non_Member` (
 
 LOCK TABLES `Non_Member` WRITE;
 /*!40000 ALTER TABLE `Non_Member` DISABLE KEYS */;
-INSERT INTO `Non_Member` VALUES ('2134','werq','',0,'','');
+INSERT INTO `Non_Member` VALUES ('010','민종석','',0,'234','ㄴㅁㅇㄹ'),('111','111','',0,'3421','dsf'),('1234','waefa','',0,'',''),('123435','adsgag','',0,'',''),('123456','ㅁㄴㅇㄹ','',0,'',''),('2134','werq','',0,'',''),('2314','agr','',0,'234515','ㄹㅇㅎ'),('234','ㄷㅁㄱㅁㅇㅎ','',0,'',''),('3214','ㄴㅁㅇㄹㅁㄹ','',0,'',''),('341','dsfasd','',0,'',''),('345235','ㅗㅎ러','',0,'',''),('4325234','dfgdsh','',0,'435','ㄱㄷㅈㅅ'),('6585','dfgf','',0,'435','ㄴㅁㅇㄹ');
 /*!40000 ALTER TABLE `Non_Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -337,12 +335,17 @@ CREATE TABLE `Non_Member_Orders` (
   `DATE` datetime NOT NULL,
   `NUM_Concert` int NOT NULL,
   `PHONE_Non_Member` char(40) NOT NULL,
-  `NUM_Seat` int NOT NULL,
+  `NUM_Seat` char(40) NOT NULL,
+  `REFUND` tinyint(1) NOT NULL,
+  `EXCHANGE` tinyint(1) NOT NULL,
   PRIMARY KEY (`NUM`),
   KEY `fk_Non_Member_Orders_Concert1_idx` (`NUM_Concert`),
   KEY `fk_Non_Member_Orders_Non_Member1_idx` (`PHONE_Non_Member`),
-  KEY `fk_Non_Member_Orders_Concert_Detail1_idx` (`NUM_Seat`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  KEY `fk_Non_Member_Orders_Concert_Detail1_idx` (`NUM_Seat`),
+  CONSTRAINT `Non_Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
+  CONSTRAINT `Non_Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
+  CONSTRAINT `Non_Member_Orders_Non_Member_PHONE_fk` FOREIGN KEY (`PHONE_Non_Member`) REFERENCES `Non_Member` (`PHONE`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -351,6 +354,7 @@ CREATE TABLE `Non_Member_Orders` (
 
 LOCK TABLES `Non_Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Non_Member_Orders` DISABLE KEYS */;
+INSERT INTO `Non_Member_Orders` VALUES (1,'150000','2024-12-15 00:00:00',2,'2314','B03',1,0),(2,'150000','2024-12-15 00:00:00',2,'6585','B04',1,0),(3,'150000','2024-12-15 00:00:00',2,'4325234','B05',1,0),(4,'150000','2024-12-15 00:00:00',2,'010','B06',1,0),(5,'150000','2024-12-15 00:00:00',2,'111','B07',1,0);
 /*!40000 ALTER TABLE `Non_Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -475,4 +479,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-22 21:26:22
+-- Dump completed on 2024-11-23 19:02:15

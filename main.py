@@ -115,17 +115,20 @@ def concert_details(concert_id):
     return render_template('concert_details.html', concert=concert, concert_id=concert_id, user_name=user_name)
 
 
+# main.py
 @app.route('/concert/<int:concert_id>/seats', methods=['GET', 'POST'])
 def concert_seats(concert_id):
     user_name = session.get('user_name')
-    if not user_name:
+    non_member = session.get('non_member')
+
+    if not user_name and not non_member:
         session['concert_id'] = concert_id
         return redirect(url_for('non_member'))
 
     selected_seat = None
     if request.method == 'POST':
         selected_seat = request.form.get('seat')
-        if not user_name:
+        if not user_name and not non_member:
             session['selected_seat'] = selected_seat
             session['concert_id'] = concert_id
             return redirect(url_for('non_member'))
@@ -141,7 +144,7 @@ def concert_seats(concert_id):
     purchased_seat_numbers = [seat[0] for seat in purchased_seats]
 
     return render_template('concert_seats.html', concert=concert, seats=seats, concert_id=concert_id,
-                           user_name=user_name, selected_seat=selected_seat,
+                           user_name=user_name, non_member=non_member, selected_seat=selected_seat,
                            purchased_seat_numbers=purchased_seat_numbers)
 
 @app.route('/non_member', methods=['GET', 'POST'])
@@ -155,17 +158,14 @@ def non_member():
         bank = request.form.get('bank', '')
 
         try:
-            print(f"{type(phone)}, {type(name)}, {type(address)}, {type(post)}, {type(account)}, {type(bank)}")
-            print(f"{phone}, {name}, {address}, {post}, {account}, {bank}")
             cursor.execute(
                 "INSERT INTO Non_Member (PHONE, NAME, ADDRESS, POST, ACCOUNT, BANK) VALUES (%s, %s, %s, %s, %s, %s)",
                 (phone, name, address, post, account, bank)
             )
             conn.commit()
-            print("fsfdsfdfsf")
+            session['non_member'] = {'phone': phone, 'name': name, 'post': post, 'address': address, 'account': account, 'bank': bank}
             concert_id = session.get('concert_id')
             selected_seat = session.get('selected_seat')
-            print(concert_id, selected_seat)
             return redirect(url_for('concert_seats', concert_id=concert_id, selected_seat=selected_seat))
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
@@ -175,31 +175,30 @@ def non_member():
 @app.route('/concert/<int:concert_id>/confirm', methods=['GET', 'POST'])
 def concert_confirm(concert_id):
     if request.method == 'POST':
-        user_name = session.get('user_name')
-        user_id = session.get('user_id')  # 세션에서 사용자 ID 가져오기
         seat_num = request.form['seat']
-
-        cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
-        concert = cursor.fetchone()
-        cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num))
-        seat = cursor.fetchone()
-
-        seat_price = seat[2]
-        concert_date = concert[3]
-
-        # 사용자 ID 가져오기
-        cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name))
-        user_name = cursor.fetchone()[0]
+        sale_price = request.form['price']
+        concert_date = request.form['date']
+        user_name = session.get('user_name')
+        non_member = session.get('non_member')
 
         try:
-            print(f"Inserting into Member_Orders: SALEPRICE={seat_price}, DATE={concert_date}, ID_Member={user_name}, NUM_Seat={seat_num}, NUM_Concert={concert_id}")
-            cursor.execute(
-                "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert, REFUND, EXCHANGE) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (seat_price, concert_date, user_name, seat_num, concert_id, 0, 0)
-            )
+            if user_name:
+                cursor.execute(
+                    "SELECT ID FROM Member WHERE NAME = %s", (user_name,)
+                )
+                user_id = cursor.fetchone()[0]
+                cursor.execute(
+                    "INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert, REFUND, EXCHANGE) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (sale_price, concert_date, user_id, seat_num, concert_id, 0, 0)
+                )
+            elif non_member:
+                cursor.execute(
+                    "INSERT INTO Non_Member_Orders (SALEPRICE, DATE, NUM_Concert, PHONE_Non_Member, NUM_Seat, REFUND, EXCHANGE) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (sale_price, concert_date, concert_id, non_member['phone'], seat_num, 0, 0)
+                )
             conn.commit()
 
-            cursor.execute("UPDATE Concert_Detail SET RESERVATION = 1 WHERE NUM_Concert = %s AND NUM_Seat = %s",(concert_id, seat_num))
+            cursor.execute("UPDATE Concert_Detail SET RESERVATION = 1 WHERE NUM_Concert = %s AND NUM_Seat = %s", (concert_id, seat_num))
             conn.commit()
 
             return render_template_string('<script>alert("결제가 성공적으로 완료되었습니다!"); window.location.href="/";</script>')
@@ -213,6 +212,77 @@ def concert_confirm(concert_id):
         cursor.execute("SELECT NUM_Seat, CLASS_Seat, PRICE FROM Concert_Detail WHERE NUM_Seat = %s", (seat_num,))
         seat = cursor.fetchone()
         return render_template('concert_confirm.html', concert=concert, seat=seat, concert_id=concert_id, user_name=user_name)
+
+@app.route('/non_member_login', methods=['GET', 'POST'])
+def non_member_login():
+    if request.method == 'POST':
+        name = request.form['name']
+        phone = request.form['phone']
+        cursor.execute("SELECT * FROM Non_Member WHERE NAME = %s AND PHONE = %s", (name, phone))
+        non_member = cursor.fetchone()
+        if non_member:
+            session['non_member'] = {'name': name, 'phone': phone}
+            return redirect(url_for('non_member_orders'))
+        else:
+            return render_template_string('<script>alert("이름 또는 전화번호가 일치하지 않습니다."); window.location.href="/non_member_login";</script>')
+    return render_template('non_member_login.html')
+
+@app.route('/non_member_refund/<int:order_id>', methods=['GET', 'POST'])
+def non_member_refund(order_id):
+    non_member = session.get('non_member')
+    if not non_member:
+        return redirect(url_for('non_member_login'))
+
+    if request.method == 'POST':
+        bank = request.form.get('bank')
+        account = request.form.get('account')
+        if bank and account:
+            try:
+                cursor.execute("UPDATE Non_Member SET BANK = %s, ACCOUNT = %s WHERE PHONE = %s", (bank, account, non_member['phone']))
+                conn.commit()
+                cursor.execute("UPDATE Non_Member_Orders SET REFUND = 1 WHERE NUM = %s", (order_id,))
+                conn.commit()
+                cursor.execute("""
+                    UPDATE Concert_Detail
+                    SET RESERVATION = 0
+                    WHERE NUM_Seat = (SELECT NUM_Seat FROM Non_Member_Orders WHERE NUM = %s)
+                """, (order_id,))
+                conn.commit()
+                return render_template_string('<script>alert("환불이 성공적으로 처리되었습니다!"); window.location.href="/non_member_orders";</script>')
+            except pymysql.Error as err:
+                return render_template_string(f'<script>alert("환불 실패: {err}"); window.location.href="/non_member_orders";</script>')
+
+    return render_template('non_member_refund.html', order_id=order_id)
+
+@app.route('/non_member_orders', methods=['GET', 'POST'])
+def non_member_orders():
+    non_member = session.get('non_member')
+    if not non_member:
+        return render_template_string('<script>alert("비회원 정보를 입력해주세요."); window.location.href="/non_member_login";</script>')
+
+    phone = non_member['phone']
+    cursor.execute("""
+        SELECT DISTINCT Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Non_Member_Orders.SALEPRICE, Concert_Detail.NUM_Seat, Concert_Detail.CLASS_Seat, Non_Member_Orders.NUM
+        FROM Non_Member_Orders
+        JOIN Concert ON Non_Member_Orders.NUM_Concert = Concert.NUM
+        JOIN Concert_Detail ON Non_Member_Orders.NUM_Seat = Concert_Detail.NUM_Seat
+        WHERE Non_Member_Orders.PHONE_Non_Member = %s AND Non_Member_Orders.REFUND = 0
+    """, (phone,))
+    orders = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT DISTINCT Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Non_Member_Orders.SALEPRICE, Concert_Detail.NUM_Seat, Concert_Detail.CLASS_Seat, Non_Member.BANK, Non_Member.ACCOUNT, Non_Member_Orders.NUM
+        FROM Non_Member_Orders
+        JOIN Concert ON Non_Member_Orders.NUM_Concert = Concert.NUM
+        JOIN Concert_Detail ON Non_Member_Orders.NUM_Seat = Concert_Detail.NUM_Seat
+        JOIN Non_Member ON Non_Member_Orders.PHONE_Non_Member = Non_Member.PHONE
+        WHERE Non_Member_Orders.PHONE_Non_Member = %s AND Non_Member_Orders.REFUND = 1
+        ORDER BY Non_Member_Orders.NUM DESC
+        LIMIT 5
+    """, (phone,))
+    refunds = cursor.fetchall()
+
+    return render_template('non_member_orders.html', orders=orders, refunds=refunds, non_member=non_member)
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup_route():

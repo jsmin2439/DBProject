@@ -1,0 +1,156 @@
+<!-- templates/non_member_orders.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비회원 예약 확인 - 티켓 사이트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        header nav {
+            display: flex;
+            gap: 15px;
+        }
+        header nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .order-details {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .order-details p {
+            margin: 0;
+            color: #666;
+        }
+        .order-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-item button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .order-item button:hover {
+            background-color: #2ecc71;
+        }
+        .refund-details {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .refund-details p {
+            margin: 0;
+            color: #666;
+        }
+        .refund-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .refund-item:last-child {
+            border-bottom: none;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">티켓 사이트</div>
+        <nav>
+            <a href="/">메인</a>
+            <a href="/contact">문의하기</a>
+            {% if user_name %}
+                <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
+                <a href="/logout">로그아웃</a>
+            {% else %}
+                <a href="/login">로그인</a>
+            {% endif %}
+        </nav>
+    </header>
+    <main>
+        <div class="order-details">
+            <h2>비회원 예약 확인</h2>
+            {% for order in orders %}
+            <div class="order-item">
+                <p>공연명: {{ order[0] }}</p>
+                <p>아티스트: {{ order[1] }}</p>
+                <p>장소: {{ order[2] }}</p>
+                <p>날짜: {{ order[3] }}</p>
+                <p>가격: {{ order[4] }}</p>
+                <p>좌석 번호: {{ order[5] }}</p>
+                <p>좌석 등급: {{ order[6] }}</p>
+                <button onclick="location.href='/non_member_refund/{{ order[7] }}'">환불</button>
+                <button onclick="location.href='/non_member_exchange/{{ order[7] }}'">교환</button>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="refund-details">
+            <h2>환불 내역</h2>
+            {% for refund in refunds %}
+            <div class="refund-item">
+                <p>공연명: {{ refund[0] }}</p>
+                <p>아티스트: {{ refund[1] }}</p>
+                <p>장소: {{ refund[2] }}</p>
+                <p>날짜: {{ refund[3] }}</p>
+                <p>가격: {{ refund[4] }}</p>
+                <p>좌석 번호: {{ refund[5] }}</p>
+                <p>좌석 등급: {{ refund[6] }}</p>
+                <p>환불 계좌: {{ refund[7] }} - {{ refund[8] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+    <footer>
+        &copy; 2024 티켓 사이트. 모든 권리 보유.
+    </footer>
+</body>
+</html>

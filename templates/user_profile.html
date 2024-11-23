@@ -211,12 +211,8 @@
                 <p>가격: {{ order[4] }}</p>
                 <p>좌석 번호: {{ order[5] }}</p>
                 <p>좌석 등급: {{ order[6] }}</p>
-                <form action="/refund/{{ order[7] }}" method="post" onsubmit="return validateRefundForm()" style="display:inline;">
-                    <button type="submit">환불</button>
-                </form>
-                <form action="/exchange/{{ order[7] }}" method="post" style="display:inline;">
-                    <button type="submit">교환</button>
-                </form>
+                <button onclick="location.href='/refund/{{ order[7] }}'">환불</button>
+                <button onclick="location.href='/exchange/{{ order[7] }}'">교환</button>
             </div>
             {% endfor %}
         </div>

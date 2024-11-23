@@ -115,6 +115,7 @@
             </form>
             <a href="/">메인</a>
             <a href="/contact">문의하기</a>
+             <a href="/non_member_login">비회원 예약 확인</a>
             {% if user_name %}
                 <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
                 <a href="/logout">로그아웃</a>
@@ -134,7 +135,7 @@
                     <h3>{{ concert[1] }}</h3>
                     <p>{{ concert[3] }} - {{ concert[4] }}</p>
                     <button onclick="location.href='/concert/{{ concert[0] }}'">상세보기</button>
-                    <button onclick="location.href='/concert/{{ concert[0] }}/seats'">좌석 예매</button>
+                    <button onclick="location.href='{% if user_name %}/concert/{{ concert[0] }}/seats{% else %}/non_member{% endif %}'">좌석 예매</button>
                 </div>
             </div>
             {% endfor %}

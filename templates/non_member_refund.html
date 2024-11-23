@@ -1,0 +1,60 @@
+<!-- templates/non_member_refund.html -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환불 - 티켓 사이트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .refund-form {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin-bottom: 20px;
+        }
+        .refund-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            width: calc(50% - 10px);
+        }
+        .refund-form button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .refund-form button:hover {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h2>환불 정보 입력</h2>
+        <form class="refund-form" method="post">
+            <input type="text" name="bank" placeholder="은행" required>
+            <input type="text" name="account" placeholder="계좌번호" required>
+            <button type="submit">환불 요청</button>
+        </form>
+    </main>
+</body>
+</html>
