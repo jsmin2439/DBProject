@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='root',
+    password='!als137963',
     database='DBProject',
     charset='utf8mb4'
 )
@@ -429,8 +429,6 @@ def add_to_wishlist(concert_id):
 
     return redirect(url_for('concert_seats', concert_id=concert_id))
 
-
-
 @app.route('/wishlist/buy/<int:wishlist_id>', methods=['POST'])
 def buy_from_wishlist(wishlist_id):
     user_name = session.get('user_name')
@@ -440,7 +438,7 @@ def buy_from_wishlist(wishlist_id):
     cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
     user_id = cursor.fetchone()[0]
     cursor.execute("""
-        SELECT NUM_Concert, NUM_Seat, Concert_Detail.PRICE, Concert.DATE
+        SELECT Wishlist.NUM_Concert, Wishlist.NUM_Seat, Concert_Detail.PRICE, Concert.DATE
         FROM Wishlist
         JOIN Concert_Detail ON Wishlist.NUM_Seat = Concert_Detail.NUM_Seat
         JOIN Concert ON Wishlist.NUM_Concert = Concert.NUM
@@ -457,9 +455,9 @@ def buy_from_wishlist(wishlist_id):
             cursor.execute("UPDATE Concert_Detail SET RESERVATION = 1 WHERE NUM_Seat = %s", (seat_num,))
             cursor.execute("DELETE FROM Wishlist WHERE NUM = %s", (wishlist_id,))
             conn.commit()
-            return render_template_string('<script>alert("구매가 완료되었습니다!"); window.location.href="/wishlist";</script>')
+            return render_template_string('<script>alert("구매가 완료되었습니다!"); window.location.href="/user/%s";</script>' % user_name)
         except pymysql.Error as err:
-            return render_template_string(f'<script>alert("구매 실패: {err}"); window.location.href="/wishlist";</script>')
+            return render_template_string(f'<script>alert("구매 실패: {err}"); window.location.href="/user/{user_name}";</script>')
     return redirect(url_for('view_wishlist'))
 
 @app.route('/wishlist/delete/<int:wishlist_id>', methods=['POST'])
@@ -467,10 +465,12 @@ def delete_from_wishlist(wishlist_id):
     user_name = session.get('user_name')
     if not user_name:
         return redirect(url_for('login'))
-
-    cursor.execute("DELETE FROM Wishlist WHERE NUM = %s AND ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (wishlist_id, user_name))
-    conn.commit()
-    return redirect(url_for('view_wishlist'))
+    try:
+        cursor.execute("DELETE FROM Wishlist WHERE NUM = %s AND ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (wishlist_id, user_name))
+        conn.commit()
+        return render_template_string('<script>alert("위시리스트에서 삭제되었습니다!"); window.location.href="/user/%s";</script>' % user_name)
+    except pymysql.Error as err:
+        return render_template_string(f'<script>alert("위시리스트 삭제 실패: {err}"); window.location.href="/user/{user_name}";</script>')
 
 @app.route('/search')
 def search():
