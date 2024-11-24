@@ -51,31 +51,31 @@
         }
         main {
             padding: 20px;
+            display: flex;
+            gap: 20px;
         }
         .concert-details {
+            display: flex;
+            gap: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 20px;
-            margin-bottom: 20px;
+            flex: 1;
         }
-        .concert-details h1 {
+        .concert-details img {
+            max-width: 300px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .concert-info {
+            flex: 1;
+        }
+        .concert-info h1 {
             margin: 0 0 10px;
         }
-        .concert-details p {
+        .concert-info p {
             margin: 5px 0;
             color: #666;
-        }
-        .concert-details button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .concert-details button:hover {
-            background-color: #2ecc71;
         }
         footer {
             text-align: center;
@@ -97,7 +97,7 @@
                 <button type="submit">검색</button>
             </form>
             <a href="/">메인</a>
-            <a href="/contact">문의하기</a>
+            <!-- <a href="/contact">문의하기</a> -->
             {% if user_name %}
                 <span>환영합니다, <a href="/user/{{ user_name }}">{{ user_name }}</a>님!</span>
                 <a href="/logout">로그아웃</a>
@@ -109,11 +109,14 @@
     </header>
     <main>
         <div class="concert-details">
-            <h1>{{ concert[0] }}</h1>
-            <p>아티스트: {{ concert[1] }}</p>
-            <p>장소: {{ concert[2] }}</p>
-            <p>날짜: {{ concert[3] }}</p>
-            <button onclick="location.href='/concert/{{ concert_id }}/seats'">좌석 예매</button>
+            <div class="concert-info">
+                <h1>{{ concert[0] }}</h1>
+                <p>아티스트: {{ concert[1] }}</p>
+                <p>장소: {{ concert[2] }}</p>
+                <p>날짜: {{ concert[3] }}</p>
+                <button onclick="location.href='/concert/{{ concert_id }}/seats'">좌석 예매</button>
+            </div>
+            <img src="{{ concert[4] }}" alt="콘서트 포스터">
         </div>
     </main>
     <footer>
