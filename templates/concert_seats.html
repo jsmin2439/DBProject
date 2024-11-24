@@ -173,6 +173,7 @@
                 <p>좌석 등급: <span id="seat-class"></span></p>
                 <p>좌석 가격: <span id="seat-price"></span></p>
                 <button type="button" onclick="location.href='/concert/{{ concert_id }}/confirm?seat=' + document.querySelector('input[name=seat]:checked').value">결제하기</button>
+                <button type="button" onclick="location.href='/concert/{{ concert_id }}/wishlist?seat=' + document.querySelector('input[name=seat]:checked').value">위시리스트 추가</button>
             </div>
         </div>
     </main>

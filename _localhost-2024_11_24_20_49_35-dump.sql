@@ -30,7 +30,7 @@ CREATE TABLE `Account` (
   PRIMARY KEY (`NUM`),
   KEY `fk_Account_Member1_idx` (`ID_Member`),
   CONSTRAINT `Account_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +39,6 @@ CREATE TABLE `Account` (
 
 LOCK TABLES `Account` WRITE;
 /*!40000 ALTER TABLE `Account` DISABLE KEYS */;
-INSERT INTO `Account` VALUES (12,'ewsa','1234','2314124');
 /*!40000 ALTER TABLE `Account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -145,7 +144,7 @@ CREATE TABLE `Member` (
 
 LOCK TABLES `Member` WRITE;
 /*!40000 ALTER TABLE `Member` DISABLE KEYS */;
-INSERT INTO `Member` VALUES ('1234','sdf','3241','','','03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+INSERT INTO `Member` VALUES ('0000','zopfdjlg','34890','','','9af15b336e6a9619928537df30b2e6a2376569fcf9d7e773eccede65606529a0');
 /*!40000 ALTER TABLE `Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -200,7 +199,7 @@ CREATE TABLE `Member_Orders` (
   CONSTRAINT `Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
   CONSTRAINT `Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
   CONSTRAINT `Member_Orders_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -209,7 +208,6 @@ CREATE TABLE `Member_Orders` (
 
 LOCK TABLES `Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Member_Orders` DISABLE KEYS */;
-INSERT INTO `Member_Orders` VALUES (27,200000,'2024-12-15 00:00:00','1234','A01',2,1,0),(28,150000,'2024-11-30 00:00:00','1234','B02',3,1,0),(29,150000,'2024-12-15 00:00:00','1234','B02',2,1,0),(30,150000,'2024-12-15 00:00:00','1234','B03',2,1,0),(31,150000,'2024-11-30 00:00:00','1234','B04',3,1,0),(32,150000,'2024-11-30 00:00:00','1234','B05',3,1,0),(33,150000,'2024-12-15 00:00:00','1234','B02',2,1,0),(34,150000,'2024-11-30 00:00:00','1234','B02',3,1,0),(35,100000,'2024-11-30 00:00:00','1234','C02',3,1,0);
 /*!40000 ALTER TABLE `Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -290,7 +288,7 @@ CREATE TABLE `Non_Member` (
 
 LOCK TABLES `Non_Member` WRITE;
 /*!40000 ALTER TABLE `Non_Member` DISABLE KEYS */;
-INSERT INTO `Non_Member` VALUES ('010','민종석','',0,'234','ㄴㅁㅇㄹ'),('111','111','',0,'3421','dsf'),('1234','waefa','',0,'',''),('123435','adsgag','',0,'',''),('123456','ㅁㄴㅇㄹ','',0,'',''),('2134','werq','',0,'',''),('2314','agr','',0,'234515','ㄹㅇㅎ'),('234','ㄷㅁㄱㅁㅇㅎ','',0,'',''),('3214','ㄴㅁㅇㄹㅁㄹ','',0,'',''),('341','dsfasd','',0,'',''),('345235','ㅗㅎ러','',0,'',''),('4325234','dfgdsh','',0,'435','ㄱㄷㅈㅅ'),('6585','dfgf','',0,'435','ㄴㅁㅇㄹ');
+INSERT INTO `Non_Member` VALUES ('000','000','',0,'12323','wer'),('010','민종석','',0,'234','ㄴㅁㅇㄹ'),('111','111','',0,'3421','dsf'),('1234','waefa','',0,'',''),('123435','adsgag','',0,'',''),('123456','ㅁㄴㅇㄹ','',0,'',''),('2134','werq','',0,'',''),('2314','agr','',0,'234515','ㄹㅇㅎ'),('234','ㄷㅁㄱㅁㅇㅎ','',0,'',''),('23432','ㅗㄱ댜셔ㅘㅓ히','',0,'',''),('3214','ㄴㅁㅇㄹㅁㄹ','',0,'',''),('32412','ㅇㅈㄹㅁㄹ','',0,'',''),('341','dsfasd','',0,'',''),('345235','ㅗㅎ러','',0,'',''),('4325234','dfgdsh','',0,'435','ㄱㄷㅈㅅ'),('5555','5555','',0,'564356','dfg4'),('6585','dfgf','',0,'435','ㄴㅁㅇㄹ'),('8948590','kdfgjk','',0,'','');
 /*!40000 ALTER TABLE `Non_Member` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -345,7 +343,7 @@ CREATE TABLE `Non_Member_Orders` (
   CONSTRAINT `Non_Member_Orders_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
   CONSTRAINT `Non_Member_Orders_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
   CONSTRAINT `Non_Member_Orders_Non_Member_PHONE_fk` FOREIGN KEY (`PHONE_Non_Member`) REFERENCES `Non_Member` (`PHONE`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -354,7 +352,7 @@ CREATE TABLE `Non_Member_Orders` (
 
 LOCK TABLES `Non_Member_Orders` WRITE;
 /*!40000 ALTER TABLE `Non_Member_Orders` DISABLE KEYS */;
-INSERT INTO `Non_Member_Orders` VALUES (1,'150000','2024-12-15 00:00:00',2,'2314','B03',1,0),(2,'150000','2024-12-15 00:00:00',2,'6585','B04',1,0),(3,'150000','2024-12-15 00:00:00',2,'4325234','B05',1,0),(4,'150000','2024-12-15 00:00:00',2,'010','B06',1,0),(5,'150000','2024-12-15 00:00:00',2,'111','B07',1,0);
+INSERT INTO `Non_Member_Orders` VALUES (1,'150000','2024-12-15 00:00:00',2,'2314','B03',1,0),(2,'150000','2024-12-15 00:00:00',2,'6585','B04',1,0),(3,'150000','2024-12-15 00:00:00',2,'4325234','B05',1,0),(4,'150000','2024-12-15 00:00:00',2,'010','B06',1,0),(5,'150000','2024-12-15 00:00:00',2,'111','B07',1,0),(6,'200000','2024-12-15 00:00:00',2,'000','A02',1,0),(7,'200000','2024-12-15 00:00:00',2,'5555','A01',1,0);
 /*!40000 ALTER TABLE `Non_Member_Orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -452,13 +450,18 @@ DROP TABLE IF EXISTS `Wishlist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Wishlist` (
-  `NUM` int NOT NULL,
-  `ID_Member` int NOT NULL,
+  `NUM` int NOT NULL AUTO_INCREMENT,
+  `ID_Member` char(40) NOT NULL,
   `NUM_Concert` int NOT NULL,
+  `NUM_Seat` char(40) NOT NULL,
   PRIMARY KEY (`NUM`),
   KEY `fk_Wishlist_Member1_idx` (`ID_Member`),
-  KEY `fk_Wishlist_Concert1_idx` (`NUM_Concert`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  KEY `fk_Wishlist_Concert1_idx` (`NUM_Concert`),
+  KEY `NUM_Seat_idx` (`NUM_Seat`),
+  CONSTRAINT `Wishlist_Concert_Detail_NUM_Seat_fk` FOREIGN KEY (`NUM_Seat`) REFERENCES `Concert_Detail` (`NUM_Seat`),
+  CONSTRAINT `Wishlist_Concert_NUM_fk` FOREIGN KEY (`NUM_Concert`) REFERENCES `Concert` (`NUM`),
+  CONSTRAINT `Wishlist_Member_ID_fk` FOREIGN KEY (`ID_Member`) REFERENCES `Member` (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -467,6 +470,7 @@ CREATE TABLE `Wishlist` (
 
 LOCK TABLES `Wishlist` WRITE;
 /*!40000 ALTER TABLE `Wishlist` DISABLE KEYS */;
+INSERT INTO `Wishlist` VALUES (1,'0000',2,'A01'),(2,'0000',3,'A01'),(3,'0000',2,'A05');
 /*!40000 ALTER TABLE `Wishlist` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -479,4 +483,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-23 19:02:15
+-- Dump completed on 2024-11-24 20:49:36

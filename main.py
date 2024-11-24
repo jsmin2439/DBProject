@@ -96,6 +96,15 @@ def user_profile(user_name):
     cursor.execute("SELECT NUM, BANK, ACCOUNT FROM Account WHERE ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (user_name,))
     accounts = cursor.fetchall()
 
+    cursor.execute("""
+            SELECT Wishlist.NUM, Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Concert_Detail.NUM_Seat AS Wishlist_Seat, Concert_Detail.CLASS_Seat, Concert_Detail.PRICE
+            FROM Wishlist
+            JOIN Concert ON Wishlist.NUM_Concert = Concert.NUM
+            JOIN Concert_Detail ON Wishlist.NUM_Seat = Concert_Detail.NUM_Seat
+            WHERE Wishlist.ID_Member = (SELECT ID FROM Member WHERE NAME = %s)
+        """, (user_name,))
+    wishlist_items = cursor.fetchall()
+
     if user:
         return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts, refunds=refunds)
     else:
@@ -400,7 +409,67 @@ def refund(order_id):
     accounts = cursor.fetchall()
     return render_template('refund.html', accounts=accounts, order_id=order_id)
 
+@app.route('/concert/<int:concert_id>/wishlist', methods=['GET'])
+def add_to_wishlist(concert_id):
+    user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('login'))
 
+    seat_num = request.args.get('seat')
+    if seat_num:
+        try:
+            cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
+            user_id = cursor.fetchone()[0]
+            cursor.execute("INSERT INTO Wishlist (ID_Member, NUM_Concert, NUM_Seat) VALUES (%s, %s, %s)", (user_id, concert_id, seat_num))
+            conn.commit()
+            return render_template_string('<script>alert("위시리스트에 추가되었습니다!"); window.location.href="/concert/%s/seats";</script>' % concert_id)
+        except pymysql.Error as err:
+            return render_template_string(f'<script>alert("위시리스트 추가 실패: {err}"); window.location.href="/concert/{concert_id}/seats";</script>')
+
+    return redirect(url_for('concert_seats', concert_id=concert_id))
+
+
+
+@app.route('/wishlist/buy/<int:wishlist_id>', methods=['POST'])
+def buy_from_wishlist(wishlist_id):
+    user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT ID FROM Member WHERE NAME = %s", (user_name,))
+    user_id = cursor.fetchone()[0]
+    cursor.execute("""
+        SELECT NUM_Concert, NUM_Seat, Concert_Detail.PRICE, Concert.DATE
+        FROM Wishlist
+        JOIN Concert_Detail ON Wishlist.NUM_Seat = Concert_Detail.NUM_Seat
+        JOIN Concert ON Wishlist.NUM_Concert = Concert.NUM
+        WHERE Wishlist.NUM = %s AND Wishlist.ID_Member = %s
+    """, (wishlist_id, user_id))
+    item = cursor.fetchone()
+    if item:
+        concert_id, seat_num, price, date = item
+        try:
+            cursor.execute("""
+                INSERT INTO Member_Orders (SALEPRICE, DATE, ID_Member, NUM_Seat, NUM_Concert, REFUND, EXCHANGE)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (price, date, user_id, seat_num, concert_id, 0, 0))
+            cursor.execute("UPDATE Concert_Detail SET RESERVATION = 1 WHERE NUM_Seat = %s", (seat_num,))
+            cursor.execute("DELETE FROM Wishlist WHERE NUM = %s", (wishlist_id,))
+            conn.commit()
+            return render_template_string('<script>alert("구매가 완료되었습니다!"); window.location.href="/wishlist";</script>')
+        except pymysql.Error as err:
+            return render_template_string(f'<script>alert("구매 실패: {err}"); window.location.href="/wishlist";</script>')
+    return redirect(url_for('view_wishlist'))
+
+@app.route('/wishlist/delete/<int:wishlist_id>', methods=['POST'])
+def delete_from_wishlist(wishlist_id):
+    user_name = session.get('user_name')
+    if not user_name:
+        return redirect(url_for('login'))
+
+    cursor.execute("DELETE FROM Wishlist WHERE NUM = %s AND ID_Member = (SELECT ID FROM Member WHERE NAME = %s)", (wishlist_id, user_name))
+    conn.commit()
+    return redirect(url_for('view_wishlist'))
 
 @app.route('/search')
 def search():

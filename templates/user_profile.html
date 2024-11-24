@@ -40,7 +40,7 @@
             align-items: center;
             padding: 20px;
         }
-        .user-details, .order-details, .refund-details {
+        .user-details, .order-details, .refund-details, .wishlist-details {
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 20px;
@@ -48,7 +48,7 @@
             width: 80%;
             margin-bottom: 20px;
         }
-        .user-details p, .order-details p, .refund-details p {
+        .user-details p, .order-details p, .refund-details p, .wishlist-details p {
             margin: 0;
             color: #666;
         }
@@ -199,6 +199,30 @@
                     <button type="submit">회원 탈퇴</button>
                 </form>
             </div>
+        </div>
+        <div class="wishlist-details">
+            <h2>위시리스트</h2>
+            {% if wishlist_items %}
+                {% for item in wishlist_items %}
+                <div class="wishlist-item">
+                    <p>공연명: {{ item[1] }}</p>
+                    <p>아티스트: {{ item[2] }}</p>
+                    <p>장소: {{ item[3] }}</p>
+                    <p>날짜: {{ item[4] }}</p>
+                    <p>좌석 번호: {{ item[5] }}</p>
+                    <p>좌석 등급: {{ item[6] }}</p>
+                    <p>가격: {{ item[7] }}</p>
+                    <form action="/wishlist/buy/{{ item[0] }}" method="post">
+                        <button type="submit">구매</button>
+                    </form>
+                    <form action="/wishlist/delete/{{ item[0] }}" method="post">
+                        <button type="submit">삭제</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>위시리스트가 비어 있습니다.</p>
+            {% endif %}
         </div>
         <div class="order-details">
             <h2>구매 좌석</h2>
