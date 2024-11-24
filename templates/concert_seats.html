@@ -129,6 +129,21 @@
             bottom: 0;
             width: 100%;
         }
+        .seat.reserved {
+            background-color: #e74c3c;  /* 빨간색 - 예약됨 */
+            color: white;
+            cursor: not-allowed;
+        }
+        .seat.selecting {
+            background-color: #FFA500;  /* 주황색 - 선택중 */
+            color: white;
+            cursor: not-allowed;
+        }
+        .seat input[type="radio"]:checked + span {
+            background-color: #27ae60;  /* 초록색 - 내가 선택함 */
+            color: white;
+            border-color: #27ae60;
+        }
     </style>
 </head>
 <body>
@@ -159,7 +174,7 @@
         <div class="seat-selection">
             <div class="stage">무대</div>
             <form method="post" action="/concert/{{ concert_id }}/seats">
-                <div class="seats">
+                <div class="seats" id="seats-container">
                     {% for seat in seats %}
                     <label class="seat {% if seat[3] %}reserved{% elif seat[0] == selected_seat %}selected{% endif %}">
                         <input type="radio" name="seat" value="{{ seat[0] }}" data-price="{{ seat[2] }}" data-class="{{ seat[1] }}" {% if seat[3] %}disabled{% endif %} {% if seat[0] == selected_seat %}checked{% endif %}>
@@ -181,13 +196,87 @@
         &copy; 2024 공연 티켓 사이트. 모든 권리 보유.
     </footer>
     <script>
+        let selectedSeatNumber = null;
+
+        function selectSeat(seatNum, action) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `/concert/{{ concert_id }}/select_seat`, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(`seat=${seatNum}&action=${action}`);
+        }
+
         document.querySelectorAll('.seat input[type="radio"]').forEach(radio => {
             radio.addEventListener('change', function() {
+                if (selectedSeatNumber) {
+                    selectSeat(selectedSeatNumber, 'release');
+                }
+                selectedSeatNumber = this.value;
+                selectSeat(selectedSeatNumber, 'select');
+                
                 document.getElementById('seat-number').textContent = this.value;
                 document.getElementById('seat-class').textContent = this.dataset.class;
                 document.getElementById('seat-price').textContent = this.dataset.price;
             });
         });
+
+        function updateSeats() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/concert/{{ concert_id }}/seats_status', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const seats = JSON.parse(xhr.responseText);
+                    const seatsContainer = document.getElementById('seats-container');
+                    seatsContainer.innerHTML = '';
+                    seats.forEach(seat => {
+                        const seatLabel = document.createElement('label');
+                        const isSelected = selectedSeatNumber === seat[0].toString();
+                        const status = seat[3];  // RESERVATION 상태 (0, 1, 2)
+                        
+                        // 좌석 상태에 따른 클래스 설정
+                        let statusClass = '';
+                        if (status === 1) statusClass = 'reserved';
+                        else if (status === 2) statusClass = 'selecting';
+                        
+                        seatLabel.className = `seat ${statusClass}`;
+                        
+                        seatLabel.innerHTML = `
+                            <input type="radio" name="seat" value="${seat[0]}" 
+                                data-price="${seat[2]}" 
+                                data-class="${seat[1]}" 
+                                ${(status === 1 || (status === 2 && !isSelected)) ? 'disabled' : ''} 
+                                ${isSelected ? 'checked' : ''}>
+                            <span>${seat[1]}<br>${seat[0]}</span>
+                        `;
+                        seatsContainer.appendChild(seatLabel);
+                    });
+
+                    // 이벤트 리스너 다시 추가
+                    document.querySelectorAll('.seat input[type="radio"]').forEach(radio => {
+                        radio.addEventListener('change', function() {
+                            if (selectedSeatNumber) {
+                                selectSeat(selectedSeatNumber, 'release');
+                            }
+                            selectedSeatNumber = this.value;
+                            selectSeat(selectedSeatNumber, 'select');
+                            
+                            document.getElementById('seat-number').textContent = this.value;
+                            document.getElementById('seat-class').textContent = this.dataset.class;
+                            document.getElementById('seat-price').textContent = this.dataset.price;
+                        });
+                    });
+                }
+            };
+            xhr.send();
+        }
+
+        // 페이지 나갈 때 선택 해제
+        window.addEventListener('beforeunload', function() {
+            if (selectedSeatNumber) {
+                selectSeat(selectedSeatNumber, 'release');
+            }
+        });
+
+        setInterval(updateSeats, 1000);
     </script>
 </body>
 </html>

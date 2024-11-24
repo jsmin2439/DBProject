@@ -1,7 +1,9 @@
-from flask import Flask, request, render_template, render_template_string, session, redirect, url_for
+from flask import Flask, request, render_template, render_template_string, session, redirect, url_for, jsonify, g
 import pymysql
 from hashlib import sha256
 import webbrowser
+import time
+import contextlib
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
@@ -44,6 +46,89 @@ def verify_user(user_id, password):
             return None
     except pymysql.Error as err:
         return None
+
+def get_db_connection():
+    try:
+        global conn, cursor
+        # 연결이 끊어졌는지 확인
+        if not conn.open:
+            conn = pymysql.connect(
+                host='localhost',
+                user='root',
+                password='root',
+                database='DBProject',
+                charset='utf8mb4'
+            )
+            cursor = conn.cursor()
+        else:
+            try:
+                # 연결 상태 확인
+                conn.ping(reconnect=True)
+            except:
+                # 연결 재설정
+                conn = pymysql.connect(
+                    host='localhost',
+                    user='root',
+                    password='root',
+                    database='DBProject',
+                    charset='utf8mb4'
+                )
+                cursor = conn.cursor()
+        return conn, cursor
+    except Exception as e:
+        print(f"데이터베이스 연결 오류: {e}")
+        raise
+
+def execute_query(query, params=None):
+    max_retries = 3
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            conn, cursor = get_db_connection()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            conn.commit()
+            return cursor
+        except pymysql.Error as e:
+            retry_count += 1
+            if retry_count == max_retries:
+                raise e
+            print(f"쿼리 실행 재시도 {retry_count}/{max_retries}")
+            time.sleep(1)  # 재시도 전 1초 대기
+
+def get_db():
+    if 'db' not in g:
+        g.db = pymysql.connect(
+            host='localhost',
+            user='root',
+            password='root',
+            database='DBProject',
+            charset='utf8mb4',
+            autocommit=True
+        )
+        g.db.ping(reconnect=True)
+    return g.db
+
+def get_cursor():
+    if 'cursor' not in g:
+        g.cursor = get_db().cursor()
+    return g.cursor
+
+@contextlib.contextmanager
+def get_db_cursor():
+    try:
+        db = get_db()
+        cursor = get_cursor()
+        yield cursor
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        cursor.close()
 
 @app.route('/')
 def home():
@@ -114,9 +199,11 @@ def user_profile(user_name):
 
 @app.route('/delete_bank/<int:account_id>', methods=['POST'])
 def delete_bank(account_id):
-    cursor.execute("DELETE FROM Account WHERE NUM = %s", (account_id,))
-    conn.commit()
-    return redirect(url_for('user_profile', user_name=session.get('user_name')))
+    try:
+        execute_query("DELETE FROM Account WHERE NUM = %s", (account_id,))
+        return redirect(url_for('user_profile', user_name=session.get('user_name')))
+    except Exception as e:
+        return render_template_string(f'<script>alert("계좌 삭제 실패: {e}"); window.location.href="/user/{session.get("user_name")}";</script>')
 
 @app.route('/concert/<int:concert_id>')
 def concert_details(concert_id):
@@ -159,6 +246,41 @@ def concert_seats(concert_id):
                            user_name=user_name, non_member=non_member, selected_seat=selected_seat,
                            purchased_seat_numbers=purchased_seat_numbers)
 
+@app.route('/concert/<int:concert_id>/seats_status', methods=['GET'])
+def seats_status(concert_id):
+    try:
+        with get_db_cursor() as cursor:
+            cursor.execute(
+                "SELECT NUM_Seat, CLASS_Seat, PRICE, RESERVATION FROM Concert_Detail WHERE NUM_Concert = %s",
+                (concert_id,)
+            )
+            seats = cursor.fetchall()
+            return jsonify(seats)
+    except Exception as e:
+        print(f"Error in seats_status: {e}")
+        return jsonify([]), 500
+
+@app.route('/concert/<int:concert_id>/select_seat', methods=['POST'])
+def select_seat(concert_id):
+    seat_num = request.form['seat']
+    action = request.form['action']  # 'select' 또는 'release'
+    try:
+        with get_db_cursor() as cursor:
+            if action == 'select':
+                cursor.execute(
+                    "UPDATE Concert_Detail SET RESERVATION = 2 WHERE NUM_Concert = %s AND NUM_Seat = %s AND RESERVATION = 0",
+                    (concert_id, seat_num)
+                )
+            else:
+                cursor.execute(
+                    "UPDATE Concert_Detail SET RESERVATION = 0 WHERE NUM_Concert = %s AND NUM_Seat = %s AND RESERVATION = 2",
+                    (concert_id, seat_num)
+                )
+            return jsonify(success=True)
+    except Exception as e:
+        print(f"Error in select_seat: {e}")
+        return jsonify(success=False, error=str(e))
+
 @app.route('/non_member', methods=['GET', 'POST'])
 def non_member():
     if request.method == 'POST':
@@ -183,7 +305,7 @@ def non_member():
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
 
     concert_id = request.args.get('concert_id')
-    if concert_id:
+    if (concert_id):
         session['concert_id'] = concert_id
 
     return render_template('non_member.html')
@@ -498,11 +620,24 @@ def contact():
     return render_template('contact.html', user_name=user_name)
 
 if __name__ == "__main__":
-    webbrowser.open("http://127.0.0.1:5001")
+    # webbrowser.open("http://127.0.0.1:5001")
     app.run('0.0.0.0', port=5001, debug=True)
 
 # 앱이 종료될 때 데이터베이스 연결 닫기
 @app.teardown_appcontext
 def close_connection(exception):
-    cursor.close()
-    conn.close()
+    try:
+        cursor.close()
+        conn.close()
+    except:
+        pass
+
+@app.teardown_appcontext
+def close_db(e=None):
+    db = g.pop('db', None)
+    cursor = g.pop('cursor', None)
+    
+    if cursor:
+        cursor.close()
+    if db:
+        db.close()
