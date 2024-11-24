@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='root',
+    password='!als137963',
     database='DBProject',
     charset='utf8mb4'
 )
@@ -178,10 +178,13 @@ def non_member():
             session['non_member'] = {'phone': phone, 'name': name, 'post': post, 'address': address, 'account': account, 'bank': bank}
             concert_id = session.get('concert_id')
             selected_seat = session.get('selected_seat')
-            print("nonmem", session)
             return redirect(url_for('concert_seats', concert_id=concert_id, selected_seat=selected_seat))
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
+
+    concert_id = request.args.get('concert_id')
+    if concert_id:
+        session['concert_id'] = concert_id
 
     return render_template('non_member.html')
 
