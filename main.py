@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='!als137963',
+    password='root',
     database='DBProject',
     charset='utf8mb4'
 )
@@ -99,14 +99,15 @@ def user_profile(user_name):
     cursor.execute("""
             SELECT Wishlist.NUM, Concert.NAME, Concert.ARTIST, Concert.PLACE, Concert.DATE, Concert_Detail.NUM_Seat AS Wishlist_Seat, Concert_Detail.CLASS_Seat, Concert_Detail.PRICE
             FROM Wishlist
-            JOIN Concert ON Wishlist.NUM_Concert = Concert.NUM
-            JOIN Concert_Detail ON Wishlist.NUM_Seat = Concert_Detail.NUM_Seat
+                    JOIN Concert ON Wishlist.NUM_Concert = Concert.NUM
+                    JOIN Concert_Detail ON Wishlist.NUM_Seat = Concert_Detail.NUM_Seat
             WHERE Wishlist.ID_Member = (SELECT ID FROM Member WHERE NAME = %s)
+            AND Concert_Detail.NUM_Concert = Wishlist.NUM_Concert
         """, (user_name,))
     wishlist_items = cursor.fetchall()
 
     if user:
-        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts, refunds=refunds)
+        return render_template('user_profile.html', user=user, user_name=session_user_name, orders=orders, accounts=accounts, refunds=refunds, wishlist_items=wishlist_items)
     else:
         return render_template_string('<script>alert("사용자 정보를 찾을 수 없습니다."); window.location.href="/";</script>')
 
