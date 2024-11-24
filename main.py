@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'  # 세션 관리를 위한 비밀 키 추가
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password='!als137963',
+    password='root',
     database='DBProject',
     charset='utf8mb4'
 )
@@ -50,6 +50,7 @@ def home():
     user_name = session.get('user_name')
     cursor.execute("SELECT NUM, NAME, ARTIST, PLACE, DATE FROM Concert")
     concerts = cursor.fetchall()
+    print("home", session)
     return render_template('main.html', user_name=user_name, concerts=concerts)
 
 @app.route('/user/<user_name>', methods=['GET', 'POST'])
@@ -130,9 +131,10 @@ def concert_details(concert_id):
 def concert_seats(concert_id):
     user_name = session.get('user_name')
     non_member = session.get('non_member')
-
-    if not user_name and not non_member:
-        session['concert_id'] = concert_id
+    session['concert_id'] = concert_id
+    
+    if not user_name and not non_member:    
+        print("seat1", session)
         return redirect(url_for('non_member'))
 
     selected_seat = None
@@ -140,7 +142,7 @@ def concert_seats(concert_id):
         selected_seat = request.form.get('seat')
         if not user_name and not non_member:
             session['selected_seat'] = selected_seat
-            session['concert_id'] = concert_id
+            print("seat2", session)
             return redirect(url_for('non_member'))
 
     cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
@@ -176,6 +178,7 @@ def non_member():
             session['non_member'] = {'phone': phone, 'name': name, 'post': post, 'address': address, 'account': account, 'bank': bank}
             concert_id = session.get('concert_id')
             selected_seat = session.get('selected_seat')
+            print("nonmem", session)
             return redirect(url_for('concert_seats', concert_id=concert_id, selected_seat=selected_seat))
         except pymysql.Error as err:
             return render_template_string(f'<script>alert("등록 실패: {err}"); window.location.href="/non_member";</script>')
@@ -191,6 +194,7 @@ def concert_confirm(concert_id):
         user_name = session.get('user_name')
         non_member = session.get('non_member')
 
+        print("confirm", session)
         try:
             if user_name:
                 cursor.execute(

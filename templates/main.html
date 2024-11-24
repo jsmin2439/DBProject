@@ -137,7 +137,7 @@
                     <h3>{{ concert[1] }}</h3>
                     <p>{{ concert[3] }} - {{ concert[4] }}</p>
                     <button onclick="location.href='/concert/{{ concert[0] }}'">상세보기</button>
-                    <button onclick="location.href='{% if user_name %}/concert/{{ concert[0] }}/seats{% else %}/non_member{% endif %}'">좌석 예매</button>
+                    <button onclick="location.href='/concert/{{ concert[0] }}/seats'">좌석 예매</button>
                 </div>
             </div>
             {% endfor %}
