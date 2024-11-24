@@ -219,6 +219,13 @@
             });
         });
 
+        // 결제 버튼 클릭 이벤트
+        document.querySelector('button[onclick*="confirm"]').addEventListener('click', function(e) {
+            e.preventDefault();
+            const seat = document.querySelector('input[name=seat]:checked').value;
+            window.location.href = `/concert/{{ concert_id }}/confirm?seat=${seat}`;
+        });
+
         function updateSeats() {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', '/concert/{{ concert_id }}/seats_status', true);
@@ -269,14 +276,17 @@
             xhr.send();
         }
 
-        // 페이지 나갈 때 선택 해제
-        window.addEventListener('beforeunload', function() {
-            if (selectedSeatNumber) {
+        // 페이지 나갈 때 선택 해제 (결제 페이지 제외)
+        window.addEventListener('beforeunload', function(e) {
+            const currentUrl = window.location.href;
+            const isConfirmPage = currentUrl.includes('/confirm');
+            
+            if (!isConfirmPage && selectedSeatNumber) {
                 selectSeat(selectedSeatNumber, 'release');
             }
         });
 
-        setInterval(updateSeats, 1000);
+        setInterval(updateSeats, 500);
     </script>
 </body>
 </html>
