@@ -48,7 +48,7 @@ def verify_user(user_id, password):
 @app.route('/')
 def home():
     user_name = session.get('user_name')
-    cursor.execute("SELECT NUM, NAME, ARTIST, PLACE, DATE FROM Concert")
+    cursor.execute("SELECT NUM, NAME, ARTIST, PLACE, DATE, IMAGE FROM Concert")
     concerts = cursor.fetchall()
     print("home", session)
     return render_template('main.html', user_name=user_name, concerts=concerts)
@@ -121,7 +121,7 @@ def delete_bank(account_id):
 @app.route('/concert/<int:concert_id>')
 def concert_details(concert_id):
     user_name = session.get('user_name')
-    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE FROM Concert WHERE NUM = %s", (concert_id,))
+    cursor.execute("SELECT NAME, ARTIST, PLACE, DATE, IMAGE FROM Concert WHERE NUM = %s", (concert_id,))
     concert = cursor.fetchone()
     return render_template('concert_details.html', concert=concert, concert_id=concert_id, user_name=user_name)
 
