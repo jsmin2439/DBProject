@@ -35,6 +35,18 @@
         header nav a:hover {
             text-decoration: underline;
         }
+        header form button {
+        background: none;
+        border: none;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 0;
+    }
+    header form button:hover {
+        text-decoration: underline;
+    }
         main {
             padding: 20px;
             text-align: center;
@@ -76,14 +88,19 @@
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">티켓 사이트</div>
-        <nav>
-            <a href="/">메인</a>
-            <a href="/contact">문의하기</a>
-            <a href="/login">로그인</a>
-        </nav>
-    </header>
+<header>
+    <div class="logo">티켓 사이트</div>
+    <nav>
+        <form action="/search" method="get">
+            <input type="text" name="query" placeholder="공연 검색" required>
+            <button type="submit">검색</button>
+        </form>
+        <a href="/">메인</a>
+        <a href="/contact">문의하기</a>
+        <a href="/login">로그인</a>
+        <a href="/signup">회원가입</a>
+    </nav>
+</header>
     <main>
         <h1>비회원 예약 확인</h1>
         <form action="/non_member_login" method="post">

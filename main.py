@@ -337,6 +337,18 @@ def delete_account():
         user = cursor.fetchone()
         if user:
             try:
+                # 회원의 예약 정보 조회
+                cursor.execute("SELECT NUM, NUM_Seat FROM Member_Orders WHERE ID_Member = %s AND REFUND = 0",(user_id,))
+                orders = cursor.fetchall()
+
+                # 예약 정보 환불 처리 및 Concert_Seat 테이블 업데이트
+                for order in orders:
+                    order_id, seat_num = order
+                    cursor.execute("UPDATE Member_Orders SET REFUND = 1 WHERE NUM = %s", (order_id,))
+                    cursor.execute("UPDATE Concert_Detail SET RESERVATION = 0 WHERE NUM_Seat = %s", (seat_num,))
+
+                conn.commit()
+
                 # Account 테이블에서 해당 사용자의 계좌 정보 삭제
                 cursor.execute("DELETE FROM Account WHERE ID_Member = %s", (user_id,))
                 conn.commit()
