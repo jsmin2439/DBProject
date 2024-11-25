@@ -352,6 +352,16 @@ def concert_confirm(concert_id):
         seat = cursor.fetchone()
         return render_template('concert_confirm.html', concert=concert, seat=seat, concert_id=concert_id, user_name=user_name)
 
+@app.route('/concert/<int:concert_id>/confirm')
+def confirm_purchase(concert_id):
+    seat_num = request.args.get('seat')
+    # 좌석 상태를 계속 '선택 중'으로 유지
+    cursor.execute(
+        "UPDATE Concert_Detail SET RESERVATION = 2 WHERE NUM_Concert = %s AND NUM_Seat = %s",
+        (concert_id, seat_num)
+    )
+    conn.commit()
+
 @app.route('/non_member_login', methods=['GET', 'POST'])
 def non_member_login():
     if request.method == 'POST':
@@ -617,33 +627,9 @@ def seats():
 @app.route('/contact')
 def contact():
     user_name = session.get('user_name')
-    return render_template('contact.html', user_name=user_name)
-
-@app.route('/concert/<int:concert_id>/confirm')
-def confirm_purchase(concert_id):
-    seat_num = request.args.get('seat')
-    # 좌석 상태를 계속 '선택 중'으로 유지
-    cursor.execute(
-        "UPDATE Concert_Detail SET RESERVATION = 2 WHERE NUM_Concert = %s AND NUM_Seat = %s",
-        (concert_id, seat_num)
-    )
-    conn.commit()
-    
-    # 나머지 confirm 로직...
-
-if __name__ == "__main__":
-    # webbrowser.open("http://127.0.0.1:5001")
-    app.run('0.0.0.0', port=5001, debug=True)
+    return render_template('contact.html', user_name=user_name)    
 
 # 앱이 종료될 때 데이터베이스 연결 닫기
-@app.teardown_appcontext
-def close_connection(exception):
-    try:
-        cursor.close()
-        conn.close()
-    except:
-        pass
-
 @app.teardown_appcontext
 def close_db(e=None):
     db = g.pop('db', None)
@@ -653,3 +639,6 @@ def close_db(e=None):
         cursor.close()
     if db:
         db.close()
+
+if __name__ == "__main__":
+    app.run('0.0.0.0', port=5001, debug=True)
