@@ -135,7 +135,8 @@
                 <img src="{{ concert[5] }}" alt="Concert Image">
                 <div class="details">
                     <h3>{{ concert[1] }}</h3>
-                    <p>{{ concert[3] }} - {{ concert[4] }}</p>
+                    <p>{{ concert[3] }}</p>
+                    <p>{{ concert[4] }}</p>
                     <button onclick="location.href='/concert/{{ concert[0] }}'">상세보기</button>
                     <button onclick="location.href='{% if not user_name %}/non_member?concert_id={{ concert[0] }}{% else %}/concert/{{ concert[0] }}/seats{% endif %}'">좌석 예매</button>
                 </div>
